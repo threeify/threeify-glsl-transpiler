@@ -6,6 +6,10 @@
   "author": "threeify authors",
   "license": "ISC",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhouston/threeify-glsl-transpiler"
+  },
   "main": "main.mjs",
   "module": "main.mjs",
   "scripts": {
