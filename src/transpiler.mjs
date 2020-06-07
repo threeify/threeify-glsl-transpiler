@@ -7,12 +7,14 @@ let includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm; // copied from three.js
 let jsModulePrefix = 'export default /* glsl */ `\n';
 let jsModulePostfix = '`;';
 
-export function glslToJavaScriptTranspiler( inputFileName, outputFileName, errors, verboseLevel ) {
+export function glslToJavaScriptTranspiler( inputFileName, outputFileName, verbose ) {
 
     let inputPath = path.dirname(inputFileName);
     let inputSource = fs.readFileSync(inputFileName, 'utf8');
 
     let includeImports = [];
+
+    let errors = [];
  
     function includeReplacer( match, includeFileName ) {        
         // auto add glsl extension if it is missing.
@@ -26,7 +28,7 @@ export function glslToJavaScriptTranspiler( inputFileName, outputFileName, error
         
 
         if( ! fs.existsSync( includeFilePath ) ) { 
-            console.error( `ERROR: ${inputFileName}: '#include <${includeFileName}> - Can not find the resolved target: ${includeFilePath}'`);
+            errors.push( `#include <${includeFileName}> - Can not find the resolved target: ${includeFilePath}'` );
             return `#include <${includeFileName}> // ERROR: Can not find the resolved target: ${includeFilePath}`;
         }
         else {
@@ -52,4 +54,6 @@ export function glslToJavaScriptTranspiler( inputFileName, outputFileName, error
         makeDir.sync(outputPath);
     }
     fs.writeFileSync(outputFileName,outputModule);
+
+    return errors;
 }
