@@ -50,7 +50,9 @@ glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
     inputFileName = path.normalize(inputFileName);
     var outputFileName = inputFileName.replace(input, output) + ".js";
     let fileErrors = glslToJavaScriptTranspiler(
+      input,
       inputFileName,
+      output,
       outputFileName,
       verbose
     );

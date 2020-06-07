@@ -1,6 +1,6 @@
 {
   "name": "threeify-glsl-transpiler",
-  "version": "0.0.2-alpha",
+  "version": "0.0.1-alpha",
   "description": "A glsl to JS module transpiler.",
   "keywords": [],
   "author": "threeify authors",

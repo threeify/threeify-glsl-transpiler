@@ -7,10 +7,12 @@ let includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm; // copied from three.js
 let jsModulePrefix = 'export default /* glsl */ `\n';
 let jsModulePostfix = '`;';
 
-export function glslToJavaScriptTranspiler( inputFileName, outputFileName, verbose ) {
+export function glslToJavaScriptTranspiler( inputDirectory, inputFileName, outputDirectory, outputFileName, verbose ) {
 
     let inputPath = path.dirname(inputFileName);
     let inputSource = fs.readFileSync(inputFileName, 'utf8');
+
+    let includeGuardName = inputFileName.replace( inputDirectory, '').replace( /[_./]/gm, '_');
 
     let includeImports = [];
 
@@ -32,7 +34,7 @@ export function glslToJavaScriptTranspiler( inputFileName, outputFileName, verbo
             return `#include <${includeFileName}> // ERROR: Can not find the resolved target: ${includeFilePath}`;
         }
         else {
-            let includeVar = includeFileName.replace( /[_./]/gm, ()=> '_');
+            var includeVar = includeFilePath.replace( inputDirectory, '').replace( /[_./]/gm, '_');
             let includeImport = `import ${includeVar} from \'${includeFileName}.js'`;
             if( includeImports.indexOf( includeImport ) < 0 ) { // handle multiple imports of the same file
                 includeImports.push( includeImport );
@@ -41,7 +43,18 @@ export function glslToJavaScriptTranspiler( inputFileName, outputFileName, verbo
         }
     }
 
-    let outputSource = inputSource.replace( includePattern, includeReplacer );
+    let outputSource = inputSource;
+
+    if( inputSource.indexOf( '#pragma once' ) >= 0 ) {
+        let includeGuardPrefix = `#ifndef ${includeGuardName} // start of include guard\n#define ${includeGuardName}\n`;
+        let includeGuardPostfix = `\n\n#endif // end of include guard`;
+
+        outputSource = includeGuardPrefix + outputSource.replace( /#pragma once/gm, '') + '\n' + includeGuardPostfix;
+    }
+
+    outputSource = outputSource.replace( includePattern, includeReplacer );
+
+
     let outputModule = includeImports.join( '\n' );
     if( outputModule.length > 0 ) {
         outputModule += '\n\n';
