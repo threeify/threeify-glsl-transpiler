@@ -13,6 +13,14 @@
 
 The purpose of this is to allow one to use raw glsl files in JavaScript in the most easy fashion possible.  Keeping glsl files as *.glsl files has the benefits that syntax highlighers work out of the box as do linters.  This allows one to maximize their productivity.
 
+## Install
+
+Get it from NPM:
+
+```
+npm install --save-dev threeify-glsl-compiler
+```
+
 ## Usage
 
 Just run it to transform all glsl files from the input directory into the corresponding
