@@ -10,3 +10,12 @@
 </p>
 
 **threeify-glsl-transpiler** is glsl to JS module transpiler.  It is part of the threeify ecosystem.
+
+## Usage
+
+Just run it to transform all glsl files from the input directory into the corresponding
+glsl.js JavaScript modules in the output directory.
+
+```
+tgt -i <input directory> -o <output directory>
+```
