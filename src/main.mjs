@@ -1,3 +1,6 @@
+#!/bin/sh 
+":" //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
+
 import program from "commander";
 import process from "process";
 import glob from "glob";
@@ -5,6 +8,8 @@ import path from "path";
 import fs from "fs";
 
 import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
+
+console.log("threeify-glsl-compiler");
 
 program
   .requiredOption(
@@ -23,8 +28,6 @@ program
   );
 
 program.parse(process.argv);
-
-console.log("threeify-glsl-compiler");
 
 let verbose = program.verbose;
 
