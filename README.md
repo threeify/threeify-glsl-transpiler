@@ -11,6 +11,8 @@
 
 **threeify-glsl-transpiler** is glsl to JS module transpiler.  It is part of the threeify ecosystem.
 
+The purpose of this is to allow one to use raw glsl files in JavaScript in the most easy fashion possible.  Keeping glsl files as *.glsl files has the benefits that syntax highlighers work out of the box as do linters.  This allows one to maximize their productivity.
+
 ## Usage
 
 Just run it to transform all glsl files from the input directory into the corresponding
@@ -22,6 +24,7 @@ tgt -i <input directory> -o <output directory>
 
 ## Features
 
+* Allow you to keep your glsl files in raw glsl.
 * Convert glsl files into JavaScript modules.
 * Support "#pragma once" include guard creation.
 
@@ -69,7 +72,7 @@ vec4 linearToRGBE( in vec4 value ) {
 `;
 ```
 
-Which you can use in your code via:
+Which you can use in your JavaScript code via:
 
 ```javascript
 import rgbe_code from 'rgbe.glsl.js';
