@@ -28,23 +28,22 @@ async function main() {
   console.log("threeify-glsl-compiler");
 
   let input = path.normalize(program.input);
-  console.log(`input directory: ${input}`);
+  console.log(`  input: ${input}`);
   if (!fs.existsSync(input)) {
     throw new Error(`input directory does not exist: ${input}`);
   }
 
   let output = path.normalize(program.output);
-  console.log(`output directory: ${output}`);
+  console.log(`  output: ${output}`);
  
   let errors = [];
   // options is optional
   glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
     inputFileNames.forEach((inputFileName) => {
       inputFileName = path.normalize( inputFileName );
-      console.log(`inputFileName: ${inputFileName}`);
       var outputFileName = inputFileName.replace( input, output ) + '.js';
-      console.log(`outputFileName: ${outputFileName}`);
-      glslToJavaScriptTranspiler(inputFileName, outputFileName, errors);
+      console.log(`  ${path.basename( inputFileName )} --> ${path.basename(outputFileName )}`);
+      glslToJavaScriptTranspiler(inputFileName, outputFileName);
     });
   });
 }

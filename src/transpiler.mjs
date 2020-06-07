@@ -7,7 +7,7 @@ let includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm; // copied from three.js
 let jsModulePrefix = 'export default /* glsl */ `\n';
 let jsModulePostfix = '`;';
 
-export async function glslToJavaScriptTranspiler( inputFileName, outputFileName, errors ) {
+export function glslToJavaScriptTranspiler( inputFileName, outputFileName, errors, verboseLevel ) {
 
     let inputPath = path.dirname(inputFileName);
     let inputSource = fs.readFileSync(inputFileName, 'utf8');
@@ -15,25 +15,28 @@ export async function glslToJavaScriptTranspiler( inputFileName, outputFileName,
     let includeImports = [];
  
     function includeReplacer( match, includeFileName ) {        
-        console.log( `includeFileName ${includeFileName}` );
-        var includeFilePath = path.normalize( path.join( inputPath, includeFileName ) );
-        console.log( `includeFilePath ${includeFilePath}` );
-
-   /*     if( ! fs.existsSync( includeFilePath ) ) { 
-            errors.push( {
-                includeFileName: includeFileName,
-                type: `Can not find target of "#include <${includeFileName}>" resolve: ${includeFilePath}`
-            } );
-            return `#include <${includeFileName}> // ERROR: Can not find the file ${includeFilePath}`;
+        // auto add glsl extension if it is missing.
+        if( includeFileName.indexOf('.glsl') < 0 ) {
+            includeFileName += '.glsl';
         }
-        else {*/
+        //console.log( `includeFileName ${includeFileName}` );
+
+        var includeFilePath = path.normalize( path.join( inputPath, includeFileName ) );
+        //console.log( `includeFilePath ${includeFilePath}` );
+        
+
+        if( ! fs.existsSync( includeFilePath ) ) { 
+            console.error( `ERROR: ${inputFileName}: '#include <${includeFileName}> - Can not find the resolved target: ${includeFilePath}'`);
+            return `#include <${includeFileName}> // ERROR: Can not find the resolved target: ${includeFilePath}`;
+        }
+        else {
             let includeVar = includeFileName.replace( /[_./]/gm, ()=> '_');
             let includeImport = `import ${includeVar} from \'${includeFileName}.js'`;
             if( includeImports.indexOf( includeImport ) < 0 ) { // handle multiple imports of the same file
                 includeImports.push( includeImport );
             }
             return "${"+includeVar+"}";
-        //}
+        }
     }
 
     let outputSource = inputSource.replace( includePattern, includeReplacer );
@@ -46,7 +49,7 @@ export async function glslToJavaScriptTranspiler( inputFileName, outputFileName,
    // console.log( outputModule );
     let outputPath = path.dirname(outputFileName);
     if( ! fs.existsSync( outputPath ) ) { 
-        await makeDir(outputPath);
+        makeDir.sync(outputPath);
     }
     fs.writeFileSync(outputFileName,outputModule);
 }
