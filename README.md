@@ -19,3 +19,60 @@ glsl.js JavaScript modules in the output directory.
 ```
 tgt -i <input directory> -o <output directory>
 ```
+
+## Features
+
+* Convert glsl files into JavaScript modules.
+* Support "#pragma once" include guard creation.
+
+## Example
+
+An original ```rgbe.glsl``` file:
+
+```glsl
+#pragma once
+#include <../../math/math.glsl>
+
+vec4 rgbeToLinear( in vec4 value ) {
+	return vec4( value.rgb * exp2( value.a * 255.0 - 128.0 ), 1.0 );
+}
+
+vec4 linearToRGBE( in vec4 value ) {
+	float maxComponent = max( max( value.r, value.g ), value.b );
+	float fExp = clamp( ceil( log2( maxComponent ) ), -128.0, 127.0 );
+	return vec4( value.rgb / exp2( fExp ), ( fExp + 128.0 ) / 255.0 );
+}
+```
+
+Will be transformed into a ```rgbe.glsl.js``` JavaScript module:
+
+```javascript
+import _renderers_webgl2_shaders_includes_math_math_glsl from '../../math/math.glsl.js'
+
+export default /* glsl */ `
+#ifndef _renderers_webgl2_shaders_includes_color_spaces_rgbe_glsl // start of include guard
+#define _renderers_webgl2_shaders_includes_color_spaces_rgbe_glsl
+
+${_renderers_webgl2_shaders_includes_math_math_glsl}
+
+vec4 rgbeToLinear( in vec4 value ) {
+	return vec4( value.rgb * exp2( value.a * 255.0 - 128.0 ), 1.0 );
+}
+
+vec4 linearToRGBE( in vec4 value ) {
+	float maxComponent = max( max( value.r, value.g ), value.b );
+	float fExp = clamp( ceil( log2( maxComponent ) ), -128.0, 127.0 );
+	return vec4( value.rgb / exp2( fExp ), ( fExp + 128.0 ) / 255.0 );
+}
+
+#endif // end of include guard
+`;
+```
+
+Which you can use in your code via:
+
+```javascript
+import rgbe_code from 'rgbe.glsl.js';
+
+console.log( rgbe_cole );
+```
