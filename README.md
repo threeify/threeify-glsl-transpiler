@@ -23,6 +23,8 @@ npm install --save-dev threeify-glsl-compiler
 
 ## Usage
 
+### Build 
+
 Just run it to transform all glsl files from the input directory into the corresponding
 glsl.js JavaScript modules in the output directory.
 
@@ -30,11 +32,20 @@ glsl.js JavaScript modules in the output directory.
 tgt -i <input directory> -o <output directory>
 ```
 
+### Watch
+
+To have the transpiler constantly run and transpile files incrementally on change use the watch option:
+
+```
+tgt -i <input directory> -o <output directory> -w
+```
+
 ## Features
 
 * Allow you to keep your glsl files in raw glsl.
 * Convert glsl files into JavaScript modules.
 * Support "#pragma once" include guard creation.
+* Incremental updates when in watch mode.
 
 ## Example
 
