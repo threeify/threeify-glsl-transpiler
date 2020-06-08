@@ -1,6 +1,6 @@
 {
   "name": "threeify-glsl-transpiler",
-  "version": "0.0.6-alpha",
+  "version": "0.1.1",
   "description": "A glsl to JS module transpiler.",
   "keywords": [],
   "author": "threeify authors",
@@ -29,7 +29,8 @@
     "commander": "^5.1.0",
     "glob": "^7.1.6",
     "make-dir": "^3.1.0",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "watch": "^1.0.2"
   },
   "prettier": {
     "trailingComma": "es5",

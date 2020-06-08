@@ -1,8 +1,6 @@
 node_modules
 # build files
 dist
-# this is important to check for reliability
-package-lock.json
 
 # IDE & Docker related exclusions
 # Theiaide
@@ -11,8 +9,3 @@ package-lock.json
 .idea  
 # docker environment variables
 .env    
-
-# Ben is using this as a reference.  Remove after 0.1 release
-three.js 
-src/lib/renderers/webgl2/webgl2_fundamentals.js
-
