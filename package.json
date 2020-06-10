@@ -2,7 +2,7 @@
   "name": "threeify-glsl-transpiler",
   "version": "0.1.2",
   "description": "A glsl to JS module transpiler.",
-  "keywords": [],
+  "keywords": ["glsl","compiler","threeify","transpiler","shaders"],
   "author": "threeify authors",
   "license": "ISC",
   "type": "module",

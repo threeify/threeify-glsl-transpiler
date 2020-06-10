@@ -13,14 +13,12 @@ import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 console.log("threeify-glsl-compiler");
 
 program
-  .requiredOption(
-    "-i, --input <dirpath>",
-    `the root of the input directory tree`
+  .option(
+    "-p, --project <dirpath>",
+    `the root of the tsconfig project directory tree`
   )
-  .requiredOption(
-    "-o, --output <dirpath>",
-    `the root of the output directory tree`
-  )
+  .option("-i, --input <dirpath>", `the root of the input directory tree`)
+  .option("-o, --output <dirpath>", `the root of the output directory tree`)
   .option("-w, --watch", `watch and incremental transpile any changed files`)
   .option(
     "-v, --verbose <level>",
@@ -33,17 +31,47 @@ program.parse(process.argv);
 
 let verbose = program.verbose;
 
-let input = path.normalize(program.input);
-if (verbose >= 1) {
-  console.log(`  input: ${input}`);
+let input = null;
+let output = null;
+
+if (program.project) {
+  let tsConfigFilePath = path.join(program.project, "/tsconfig.json");
+  if (fs.existsSync(tsConfigFilePath)) {
+    var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
+    if (tsConfig.compilerOptions) {
+      if (tsConfig.compilerOptions.rootDir) {
+        input = path.join(program.project, tsConfig.compilerOptions.rootDir);
+      }
+      if (tsConfig.compilerOptions.outDir) {
+        output = path.join(program.project, tsConfig.compilerOptions.outDir);
+      }
+    }
+  } else {
+    console.error(
+      `Can not find a tsconfig.json file here: ${tsConfigFilePath}`
+    );
+  }
 }
+
+if (program.input) {
+  input = program.input;
+}
+if (program.output) {
+  output = program.output;
+}
+
+output = path.normalize(output);
+input = path.normalize(input);
+
 if (!fs.existsSync(input)) {
   throw new Error(`input directory does not exist: ${input}`);
 }
-
-let output = path.normalize(program.output);
 if (verbose >= 1) {
   console.log(`  output: ${output}`);
+}
+
+if (verbose >= 1) {
+  console.log(`  input: ${input}`);
 }
 
 let numFiles = 0;
