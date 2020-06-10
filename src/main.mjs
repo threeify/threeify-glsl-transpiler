@@ -33,24 +33,30 @@ let verbose = program.verbose;
 
 let input = null;
 let output = null;
+let project = null;
 
 if (program.project) {
-  let tsConfigFilePath = path.join(program.project, "/tsconfig.json");
-  if (fs.existsSync(tsConfigFilePath)) {
-    var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
-    if (tsConfig.compilerOptions) {
-      if (tsConfig.compilerOptions.rootDir) {
-        input = path.join(program.project, tsConfig.compilerOptions.rootDir);
-      }
-      if (tsConfig.compilerOptions.outDir) {
-        output = path.join(program.project, tsConfig.compilerOptions.outDir);
-      }
+  project = program.project;
+}
+
+if (!project) {
+  // get this current path;
+  throw new Error("not implemented.");
+}
+
+let tsConfigFilePath = path.join(project, "/tsconfig.json");
+if (fs.existsSync(tsConfigFilePath)) {
+  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
+  if (tsConfig.compilerOptions) {
+    if (tsConfig.compilerOptions.rootDir) {
+      input = path.join(program.project, tsConfig.compilerOptions.rootDir);
     }
-  } else {
-    console.error(
-      `Can not find a tsconfig.json file here: ${tsConfigFilePath}`
-    );
+    if (tsConfig.compilerOptions.outDir) {
+      output = path.join(program.project, tsConfig.compilerOptions.outDir);
+    }
   }
+} else {
+  console.error(`Can not find a tsconfig.json file here: ${tsConfigFilePath}`);
 }
 
 if (program.input) {
