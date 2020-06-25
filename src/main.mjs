@@ -2,12 +2,11 @@
 ":"; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 
 import program from "commander";
-import process from "process";
+import fs from "fs";
 import glob from "glob";
 import path from "path";
-import fs from "fs";
+import process, { exit } from "process";
 import watch from "watch";
-
 import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 
 console.log("threeify-glsl-compiler");
@@ -40,11 +39,11 @@ if (program.project) {
 }
 
 if (!project) {
-  // get this current path;
-  throw new Error("not implemented.");
+  project = process.cwd();
 }
 
 let tsConfigFilePath = path.join(project, "/tsconfig.json");
+console.log("tsConfigFilePath", tsConfigFilePath);
 if (fs.existsSync(tsConfigFilePath)) {
   var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
   if (tsConfig.compilerOptions) {
@@ -55,23 +54,33 @@ if (fs.existsSync(tsConfigFilePath)) {
       output = path.join(program.project, tsConfig.compilerOptions.outDir);
     }
   }
-} else {
-  console.error(`Can not find a tsconfig.json file here: ${tsConfigFilePath}`);
 }
-
+console.log("input 1", input);
+console.log("output 1", output);
 if (program.input) {
   input = program.input;
 }
 if (program.output) {
   output = program.output;
 }
+console.log("input 2", input);
+console.log("output 2", output);
+if (!input) {
+  console.error(`no input directory specified`);
+  exit(0);
+}
+if (!fs.existsSync(input)) {
+  console.error(`can not find input directory: ${input}`);
+  exit(0);
+}
+if (!output) {
+  console.error(`no output directory specified and no tsconfig.json`);
+  exit(0);
+}
 
 output = path.normalize(output);
 input = path.normalize(input);
 
-if (!fs.existsSync(input)) {
-  throw new Error(`input directory does not exist: ${input}`);
-}
 if (verbose >= 1) {
   console.log(`  output: ${output}`);
 }
@@ -124,7 +133,7 @@ function transpile(inputFileName) {
 glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
   inputFileNames.forEach((inputFileName) => {
     numFiles++;
-    transpile(inputFileName);
+    transpile(inputFileName, input, output);
   });
 
   if (numErrors > 0) {
