@@ -1,9 +1,9 @@
-import path from "path";
 import fs from "fs";
 import makeDir from "make-dir";
+import path from "path";
 
-let includePattern = /^[ \t]*#(pragma +)?include +[<"](?<filePath>[\w\d./]+)[>"]/gm; // modified from three.js
-
+let includeRegex = /^[ \t]*#(pragma +)?include +[<"](?<filePath>[\w\d./]+)[>"]/gm; // modified from three.js
+let commentRegex = /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm; // https://stackoverflow.com/a/15123777
 let jsModulePrefix = "export default /* glsl */ `\n";
 let jsModulePostfix = "`;";
 
@@ -59,8 +59,11 @@ export function glslToJavaScriptTranspiler(
 
   let outputSource = inputSource;
 
+  // remove comments based on this stack overflow answer: https://stackoverflow.com/a/15123777
+  outputSource = outputSource.replace(commentRegex, "");
+
   if (inputSource.indexOf("#pragma once") >= 0) {
-    let includeGuardPrefix = `#ifndef ${includeGuardName} // start of include guard\n#define ${includeGuardName}\n`;
+    let includeGuardPrefix = `#ifndef ${includeGuardName}\n#define ${includeGuardName}\n`;
     let includeGuardPostfix = `\n\n#endif // end of include guard`;
 
     outputSource =
@@ -70,7 +73,7 @@ export function glslToJavaScriptTranspiler(
       includeGuardPostfix;
   }
 
-  outputSource = outputSource.replace(includePattern, includeReplacer);
+  outputSource = outputSource.replace(includeRegex, includeReplacer);
 
   let outputModule = includeImports.join("\n");
   if (outputModule.length > 0) {
