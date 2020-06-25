@@ -196,7 +196,11 @@ function transpile(sourceFileName) {
 
 function isFileSupported(fileName) {
   let ext = path.extname(fileName);
-  return extensions.includes(ext.toLowerCase());
+  if (ext.length > 1) {
+    ext = ext.slice(1);
+  }
+  let result = extensions.includes(ext.toLowerCase());
+  return result;
 }
 
 // options is optional
