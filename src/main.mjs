@@ -20,13 +20,22 @@ program
     "-p, --project <dirpath>",
     `the root of the tsconfig project directory tree`
   )
-  .option("-i, --input <dirpath>", `the root of the input directory tree`)
+  .option("-s, --source <dirpath>", `the root of the source directory tree`)
   .option("-o, --output <dirpath>", `the root of the output directory tree`)
   .option("-w, --watch", `watch and incremental transpile any changed files`)
-  .option("-c, --compact", `remove comments and other non-essential components`)
+  .option("-c, --comments", `leave comments and other non-essential components`)
+  .option(
+    "-j, --javascript",
+    `allow referencing javascript and typescript code via includes`
+  )
   .option(
     "-e, --extensions <items>",
     "comma separated list of extensions to transpile",
+    commaSeparatedList
+  )
+  .option(
+    "-i, --includes <items>",
+    "comma separated list of include directories relative to source root",
     commaSeparatedList
   )
   .option(
@@ -40,18 +49,24 @@ program.parse(process.argv);
 
 let options = {
   verbose: 0,
-  compact: false,
+  comments: false,
+  javascript: false,
 };
 options.verbose = program.verbose;
-options.compact = program.compact;
+options.comments = !!program.comments;
+options.javascript = !!program.javascript;
 
-let input = null;
+let source = null;
 let output = null;
 let project = null;
 let extensions = ["glsl"];
+let includeDirectories = [];
 
 if (program.extensions !== undefined) {
   extensions = program.extensions;
+}
+if (program.includes !== undefined) {
+  includeDirectories = program.includes;
 }
 
 if (program.project) {
@@ -68,13 +83,18 @@ if (fs.existsSync(threeifyFilePath)) {
   if (threeifyConfig.glsl) {
     var config = threeifyConfig.glsl;
     if (config.sourceDir) {
-      input = path.join(project, config.sourceDir);
+      source = path.join(project, config.sourceDir);
     }
     if (config.outputDir) {
       output = path.join(project, config.outputDir);
     }
     if (config.extensions) {
       extensions = config.extensions;
+    }
+    if (config.includeDirs) {
+      config.includeDirs.forEach((includeDir) => {
+        includeDirectories.push(includeDir);
+      });
     }
   }
 }
@@ -83,8 +103,8 @@ let tsConfigFilePath = path.join(project, "/tsconfig.json");
 if (fs.existsSync(tsConfigFilePath)) {
   var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
   if (tsConfig.compilerOptions) {
-    if (!input && tsConfig.compilerOptions.rootDir) {
-      input = path.join(project, tsConfig.compilerOptions.rootDir);
+    if (!source && tsConfig.compilerOptions.rootDir) {
+      source = path.join(project, tsConfig.compilerOptions.rootDir);
     }
     if (!output && tsConfig.compilerOptions.outDir) {
       output = path.join(project, tsConfig.compilerOptions.outDir);
@@ -95,18 +115,18 @@ if (fs.existsSync(tsConfigFilePath)) {
 extensions = extensions.map((ext) => ext.toLowerCase());
 
 if (program.input) {
-  input = program.input;
+  source = program.input;
 }
 if (program.output) {
   output = program.output;
 }
 
-if (!input) {
-  console.error(`no input directory specified`);
+if (!source) {
+  console.error(`no source directory specified`);
   exit(0);
 }
-if (!fs.existsSync(input)) {
-  console.error(`can not find input directory: ${input}`);
+if (!fs.existsSync(source)) {
+  console.error(`can not find source directory: ${source}`);
   exit(0);
 }
 if (!output) {
@@ -114,15 +134,20 @@ if (!output) {
   exit(0);
 }
 
+includeDirectories = includeDirectories.map((dir) => path.join(source, dir));
+if (includeDirectories.length === 0) {
+  includeDirectories.push(source);
+}
+
 output = path.normalize(output);
-input = path.normalize(input);
+source = path.normalize(source);
 
 if (options.verbose >= 1) {
   console.log(`  output: ${output}`);
 }
 
 if (options.verbose >= 1) {
-  console.log(`  input: ${input}`);
+  console.log(`  input: ${source}`);
 }
 
 let numFiles = 0;
@@ -130,25 +155,27 @@ let numErrors = 0;
 
 function inputFileNameToOutputFileName(inputFileName) {
   inputFileName = path.normalize(inputFileName);
-  var outputFileName = inputFileName.replace(input, output) + ".js";
+  var outputFileName = inputFileName.replace(source, output) + ".js";
   return outputFileName;
 }
 
-function transpile(inputFileName) {
-  inputFileName = path.normalize(inputFileName);
-  var outputFileName = inputFileNameToOutputFileName(inputFileName);
+function transpile(sourceFileName) {
+  sourceFileName = path.normalize(sourceFileName);
+  var outputFileName = inputFileNameToOutputFileName(sourceFileName);
   let fileErrors = glslToJavaScriptTranspiler(
-    input,
-    inputFileName,
+    includeDirectories,
+    source,
+    sourceFileName,
     output,
     outputFileName,
+    extensions,
     options
   );
 
   if (fileErrors.length > 0) {
     numErrors++;
     console.error(
-      `  ${path.basename(inputFileName)} --> ${path.basename(
+      `  ${path.basename(sourceFileName)} --> ${path.basename(
         outputFileName
       )}: ${fileErrors.length} Errors.`
     );
@@ -158,7 +185,9 @@ function transpile(inputFileName) {
   } else {
     if (options.verbose >= 1) {
       console.log(
-        `  ${path.basename(inputFileName)} --> ${path.basename(outputFileName)}`
+        `  ${path.basename(sourceFileName)} --> ${path.basename(
+          outputFileName
+        )}`
       );
     }
   }
@@ -172,10 +201,10 @@ function isFileSupported(fileName) {
 
 // options is optional
 let extGlob = extensions.join("|");
-glob(`${input}/**/*.+(${extGlob})`, {}, function (er, inputFileNames) {
-  inputFileNames.forEach((inputFileName) => {
+glob(`${source}/**/*.+(${extGlob})`, {}, function (er, sourceFileNames) {
+  sourceFileNames.forEach((inputFileName) => {
     numFiles++;
-    transpile(inputFileName, input, output);
+    transpile(inputFileName, source, output);
   });
 
   if (numErrors > 0) {
@@ -184,23 +213,23 @@ glob(`${input}/**/*.+(${extGlob})`, {}, function (er, inputFileNames) {
   console.log(`${numFiles - numErrors} files transpile successfully.`);
 
   if (program.watch) {
-    watch.createMonitor(input, function (monitor) {
-      monitor.on("created", function (inputFileName, stat) {
-        if (options.verbose > 1) console.log(`created ${inputFileName}`);
-        if (isFileSupported(inputFileName)) {
-          transpile(inputFileName);
+    watch.createMonitor(source, function (monitor) {
+      monitor.on("created", function (sourceFileName, stat) {
+        if (options.verbose > 1) console.log(`created ${sourceFileName}`);
+        if (isFileSupported(sourceFileName)) {
+          transpile(sourceFileName);
         }
       });
-      monitor.on("changed", function (inputFileName, curr, prev) {
-        if (options.verbose > 1) console.log(`changed ${inputFileName}`);
-        if (isFileSupported(inputFileName)) {
-          transpile(inputFileName);
+      monitor.on("changed", function (sourceFileName, curr, prev) {
+        if (options.verbose > 1) console.log(`changed ${sourceFileName}`);
+        if (isFileSupported(sourceFileName)) {
+          transpile(sourceFileName);
         }
       });
-      monitor.on("removed", function (inputFileName, stat) {
-        if (options.verbose > 1) console.log(`removed ${inputFileName}`);
-        if (isFileSupported(inputFileName)) {
-          let outputFileName = inputFileNameToOutputFileName(inputFileName);
+      monitor.on("removed", function (sourceFileName, stat) {
+        if (options.verbose > 1) console.log(`removed ${sourceFileName}`);
+        if (isFileSupported(sourceFileName)) {
+          let outputFileName = inputFileNameToOutputFileName(sourceFileName);
           if (fs.existsSync(outputFileName)) {
             fs.unlink(outputFileName);
           }
