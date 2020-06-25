@@ -9,7 +9,7 @@ import process, { exit } from "process";
 import watch from "watch";
 import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 
-console.log("threeify-glsl-compiler");
+console.log("threeify-glsl-transpiler");
 
 function commaSeparatedList(value, dummyPrevious) {
   return value.split(",");
