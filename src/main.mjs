@@ -2,25 +2,22 @@
 ":"; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 
 import program from "commander";
-import process from "process";
+import fs from "fs";
 import glob from "glob";
 import path from "path";
-import fs from "fs";
+import process, { exit } from "process";
 import watch from "watch";
-
 import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 
 console.log("threeify-glsl-compiler");
 
 program
-  .requiredOption(
-    "-i, --input <dirpath>",
-    `the root of the input directory tree`
+  .option(
+    "-p, --project <dirpath>",
+    `the root of the tsconfig project directory tree`
   )
-  .requiredOption(
-    "-o, --output <dirpath>",
-    `the root of the output directory tree`
-  )
+  .option("-i, --input <dirpath>", `the root of the input directory tree`)
+  .option("-o, --output <dirpath>", `the root of the output directory tree`)
   .option("-w, --watch", `watch and incremental transpile any changed files`)
   .option(
     "-v, --verbose <level>",
@@ -33,17 +30,63 @@ program.parse(process.argv);
 
 let verbose = program.verbose;
 
-let input = path.normalize(program.input);
-if (verbose >= 1) {
-  console.log(`  input: ${input}`);
-}
-if (!fs.existsSync(input)) {
-  throw new Error(`input directory does not exist: ${input}`);
+let input = null;
+let output = null;
+let project = null;
+
+if (program.project) {
+  project = program.project;
 }
 
-let output = path.normalize(program.output);
+if (!project) {
+  project = process.cwd();
+}
+
+let tsConfigFilePath = path.join(project, "/tsconfig.json");
+console.log("tsConfigFilePath", tsConfigFilePath);
+if (fs.existsSync(tsConfigFilePath)) {
+  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
+  if (tsConfig.compilerOptions) {
+    if (tsConfig.compilerOptions.rootDir) {
+      input = path.join(program.project, tsConfig.compilerOptions.rootDir);
+    }
+    if (tsConfig.compilerOptions.outDir) {
+      output = path.join(program.project, tsConfig.compilerOptions.outDir);
+    }
+  }
+}
+console.log("input 1", input);
+console.log("output 1", output);
+if (program.input) {
+  input = program.input;
+}
+if (program.output) {
+  output = program.output;
+}
+console.log("input 2", input);
+console.log("output 2", output);
+if (!input) {
+  console.error(`no input directory specified`);
+  exit(0);
+}
+if (!fs.existsSync(input)) {
+  console.error(`can not find input directory: ${input}`);
+  exit(0);
+}
+if (!output) {
+  console.error(`no output directory specified and no tsconfig.json`);
+  exit(0);
+}
+
+output = path.normalize(output);
+input = path.normalize(input);
+
 if (verbose >= 1) {
   console.log(`  output: ${output}`);
+}
+
+if (verbose >= 1) {
+  console.log(`  input: ${input}`);
 }
 
 let numFiles = 0;
@@ -90,7 +133,7 @@ function transpile(inputFileName) {
 glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
   inputFileNames.forEach((inputFileName) => {
     numFiles++;
-    transpile(inputFileName);
+    transpile(inputFileName, input, output);
   });
 
   if (numErrors > 0) {
