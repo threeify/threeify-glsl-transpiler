@@ -12,7 +12,7 @@ export function glslToJavaScriptTranspiler(
   inputFileName,
   outputDirectory,
   outputFileName,
-  verbose
+  options
 ) {
   let inputPath = path.dirname(inputFileName);
   let inputSource = fs.readFileSync(inputFileName, "utf8");
@@ -59,8 +59,9 @@ export function glslToJavaScriptTranspiler(
 
   let outputSource = inputSource;
 
-  // remove comments based on this stack overflow answer: https://stackoverflow.com/a/15123777
-  outputSource = outputSource.replace(commentRegex, "");
+  if (options.removeComments) {
+    outputSource = outputSource.replace(commentRegex, "");
+  }
 
   if (inputSource.indexOf("#pragma once") >= 0) {
     let includeGuardPrefix = `#ifndef ${includeGuardName}\n#define ${includeGuardName}\n`;
@@ -81,7 +82,6 @@ export function glslToJavaScriptTranspiler(
   }
   outputModule += jsModulePrefix + outputSource + "\n" + jsModulePostfix;
 
-  // console.log( outputModule );
   let outputPath = path.dirname(outputFileName);
   if (!fs.existsSync(outputPath)) {
     makeDir.sync(outputPath);
