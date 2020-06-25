@@ -11,6 +11,10 @@ import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 
 console.log("threeify-glsl-compiler");
 
+function commaSeparatedList(value, dummyPrevious) {
+  return value.split(",");
+}
+
 program
   .option(
     "-p, --project <dirpath>",
@@ -19,6 +23,12 @@ program
   .option("-i, --input <dirpath>", `the root of the input directory tree`)
   .option("-o, --output <dirpath>", `the root of the output directory tree`)
   .option("-w, --watch", `watch and incremental transpile any changed files`)
+  .option("-c, --compact", `remove comments and other non-essential components`)
+  .option(
+    "-e, --extensions <items>",
+    "comma separated list of extensions to transpile",
+    commaSeparatedList
+  )
   .option(
     "-v, --verbose <level>",
     `higher numbers means more output`,
@@ -28,11 +38,21 @@ program
 
 program.parse(process.argv);
 
-let verbose = program.verbose;
+let options = {
+  verbose: 0,
+  compact: false,
+};
+options.verbose = program.verbose;
+options.compact = program.compact;
 
 let input = null;
 let output = null;
 let project = null;
+let extensions = ["glsl"];
+
+if (program.extensions !== undefined) {
+  extensions = program.extensions;
+}
 
 if (program.project) {
   project = program.project;
@@ -45,11 +65,17 @@ if (!project) {
 let threeifyFilePath = path.join(project, "/threeify.json");
 if (fs.existsSync(threeifyFilePath)) {
   var threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath));
-  if (threeifyConfig.glslSourceDir) {
-    input = path.join(project, threeifyConfig.glslSourceDir);
-  }
-  if (threeifyConfig.glslOutputDir) {
-    output = path.join(project, threeifyConfig.glslOutputDir);
+  if (threeifyConfig.glsl) {
+    var config = threeifyConfig.glsl;
+    if (config.sourceDir) {
+      input = path.join(project, config.sourceDir);
+    }
+    if (config.outputDir) {
+      output = path.join(project, config.outputDir);
+    }
+    if (config.extensions) {
+      extensions = config.extensions;
+    }
   }
 }
 
@@ -65,6 +91,8 @@ if (fs.existsSync(tsConfigFilePath)) {
     }
   }
 }
+
+extensions = extensions.map((ext) => ext.toLowerCase());
 
 if (program.input) {
   input = program.input;
@@ -89,11 +117,11 @@ if (!output) {
 output = path.normalize(output);
 input = path.normalize(input);
 
-if (verbose >= 1) {
+if (options.verbose >= 1) {
   console.log(`  output: ${output}`);
 }
 
-if (verbose >= 1) {
+if (options.verbose >= 1) {
   console.log(`  input: ${input}`);
 }
 
@@ -114,7 +142,7 @@ function transpile(inputFileName) {
     inputFileName,
     output,
     outputFileName,
-    verbose
+    options
   );
 
   if (fileErrors.length > 0) {
@@ -128,7 +156,7 @@ function transpile(inputFileName) {
       console.error(`    ${error}`);
     });
   } else {
-    if (verbose >= 1) {
+    if (options.verbose >= 1) {
       console.log(
         `  ${path.basename(inputFileName)} --> ${path.basename(outputFileName)}`
       );
@@ -137,8 +165,14 @@ function transpile(inputFileName) {
   return fileErrors;
 }
 
+function isFileSupported(fileName) {
+  let ext = path.extname(fileName);
+  return extensions.includes(ext.toLowerCase());
+}
+
 // options is optional
-glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
+let extGlob = extensions.join("|");
+glob(`${input}/**/*.+(${extGlob})`, {}, function (er, inputFileNames) {
   inputFileNames.forEach((inputFileName) => {
     numFiles++;
     transpile(inputFileName, input, output);
@@ -152,20 +186,20 @@ glob(`${input}/**/*.glsl`, {}, function (er, inputFileNames) {
   if (program.watch) {
     watch.createMonitor(input, function (monitor) {
       monitor.on("created", function (inputFileName, stat) {
-        if (verbose > 1) console.log(`created ${inputFileName}`);
-        if (inputFileName.indexOf(".glsl") >= 0) {
+        if (options.verbose > 1) console.log(`created ${inputFileName}`);
+        if (isFileSupported(inputFileName)) {
           transpile(inputFileName);
         }
       });
       monitor.on("changed", function (inputFileName, curr, prev) {
-        if (verbose > 1) console.log(`changed ${inputFileName}`);
-        if (inputFileName.indexOf(".glsl") >= 0) {
+        if (options.verbose > 1) console.log(`changed ${inputFileName}`);
+        if (isFileSupported(inputFileName)) {
           transpile(inputFileName);
         }
       });
       monitor.on("removed", function (inputFileName, stat) {
-        if (verbose > 1) console.log(`removed ${inputFileName}`);
-        if (inputFileName.indexOf(".glsl") >= 0) {
+        if (options.verbose > 1) console.log(`removed ${inputFileName}`);
+        if (isFileSupported(inputFileName)) {
           let outputFileName = inputFileNameToOutputFileName(inputFileName);
           if (fs.existsSync(outputFileName)) {
             fs.unlink(outputFileName);
