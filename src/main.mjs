@@ -42,29 +42,37 @@ if (!project) {
   project = process.cwd();
 }
 
+let threeifyFilePath = path.join(project, "/threeify.json");
+if (fs.existsSync(threeifyFilePath)) {
+  var threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath));
+  if (threeifyConfig.glslSourceDir) {
+    input = path.join(project, threeifyConfig.glslSourceDir);
+  }
+  if (threeifyConfig.glslOutputDir) {
+    output = path.join(project, threeifyConfig.glslOutputDir);
+  }
+}
+
 let tsConfigFilePath = path.join(project, "/tsconfig.json");
-console.log("tsConfigFilePath", tsConfigFilePath);
 if (fs.existsSync(tsConfigFilePath)) {
   var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
   if (tsConfig.compilerOptions) {
-    if (tsConfig.compilerOptions.rootDir) {
-      input = path.join(program.project, tsConfig.compilerOptions.rootDir);
+    if (!input && tsConfig.compilerOptions.rootDir) {
+      input = path.join(project, tsConfig.compilerOptions.rootDir);
     }
-    if (tsConfig.compilerOptions.outDir) {
-      output = path.join(program.project, tsConfig.compilerOptions.outDir);
+    if (!output && tsConfig.compilerOptions.outDir) {
+      output = path.join(project, tsConfig.compilerOptions.outDir);
     }
   }
 }
-console.log("input 1", input);
-console.log("output 1", output);
+
 if (program.input) {
   input = program.input;
 }
 if (program.output) {
   output = program.output;
 }
-console.log("input 2", input);
-console.log("output 2", output);
+
 if (!input) {
   console.error(`no input directory specified`);
   exit(0);
