@@ -55,7 +55,7 @@ Just run it to transform all glsl files from the input directory into the corres
 glsl.js JavaScript modules in the output directory.
 
 ```
-tgt -r <input directory> -o <output directory>
+tgt -r <source directory> -o <output directory>
 ```
 
 ### Watch
@@ -63,7 +63,7 @@ tgt -r <input directory> -o <output directory>
 To have the transpiler constantly run and transpile files incrementally on change use the watch option:
 
 ```
-tgt --rootDir <input directory> --outDir <output directory> ---watch
+tgt --rootDir <source directory> --outDir <output directory> ---watch
 ```
 
 ## Features
