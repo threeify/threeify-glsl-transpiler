@@ -20,16 +20,33 @@ threeify-glsl-transpiler
 Usage: main [options]
 
 Options:
-  -p, --project <dirpath>   the root of the tsconfig project directory tree
-  -s, --source <dirpath>    the root of the source directory tree
-  -o, --output <dirpath>    the root of the output directory tree
-  -w, --watch               watch and incremental transpile any changed files
-  -c, --comments            leave comments and other non-essential components
-  -j, --javascript          allow referencing javascript and typescript code via includes
-  -e, --extensions <items>  comma separated list of extensions to transpile
-  -i, --includes <items>    comma separated list of include directories relative to source root
-  -v, --verbose <level>     higher numbers means more output (default: 0)
-  -h, --help                display help for command
+  -p, --projectDir <dirpath>  the root of the project directory tree
+  -r, --rootDir <dirpath>     the root of the source directory tree
+  -o, --outDir <dirpath>      the root of the output directory tree
+  -w, --watch                 watch and incremental transpile any changed files
+  -j, --allowJSIncludes       allow referencing javascript and typescript code via includes
+  -m, --minify                reduce the size of the glsl code
+  -e, --extensions <items>    comma separated list of extensions to transpile
+  -i, --includeDirs <items>   comma separated list of include directories relative to source root
+  -v, --verboseLevel <level>  higher numbers means more output
+  -h, --help                  display help for command
+Done in 0.11s.
+```
+
+You can also use a `threeify.json` configuration file in the root of your project:
+
+```json
+{
+  "glsl": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "includeDirs": ["lib/shaders/includes"],
+    "extensions": ["glsl", "frag", "vert"],
+    "minify": true,
+    "allowJSIncludes": true,
+    "verboseLevel": 0
+  }
+}
 ```
 
 ### Build
