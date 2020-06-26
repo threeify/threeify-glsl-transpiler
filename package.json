@@ -1,6 +1,6 @@
 {
   "name": "threeify-glsl-transpiler",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "A glsl to JS module transpiler.",
   "keywords": [
     "glsl",
@@ -14,7 +14,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bhouston/threeify-glsl-transpiler"
+    "url": "https://github.com/threeify/threeify-glsl-transpiler"
   },
   "bin": {
     "tgt": "./src/main.mjs"
@@ -35,13 +35,6 @@
     "commander": "^5.1.0",
     "glob": "^7.1.6",
     "make-dir": "^3.1.0",
-    "prettier": "^2.0.5",
     "watch": "^1.0.2"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": true,
-    "singleQuote": false
   }
 }
