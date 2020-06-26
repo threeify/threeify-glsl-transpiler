@@ -92,7 +92,22 @@ export function glslToJavaScriptTranspiler(
   let outputSource = sourceCode;
 
   if (options.minify) {
+    // remove comments
     outputSource = outputSource.replace(commentRegex, "");
+    // remove unnecessary line ends
+    outputSource = outputSource.replace(/[\r\n]+/g, '\n');
+    // remove double+ spaces
+    outputSource = outputSource.replace(/[ \t]+/g, ' ');
+    // remove spaces between symbols
+    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']', '<', '>','?'];
+    for( let i = 0; i < specialChars.length; i ++ ) {
+      let lastLength = 0;
+      while( lastLength !== outputSource.length ) {
+        lastLength = outputSource.length;
+        outputSource = outputSource.replace( specialChars[i] + ' ', specialChars[i]); 
+        outputSource = outputSource.replace( ' ' + specialChars[i], specialChars[i]);
+      }
+    }
   }
 
   if (sourceCode.indexOf("#pragma once") >= 0) {
