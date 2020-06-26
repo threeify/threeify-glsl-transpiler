@@ -9,13 +9,15 @@ import process, { exit } from "process";
 import watch from "watch";
 import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
 
-console.log("threeify-glsl-transpiler");
-
 function commaSeparatedList(value, dummyPrevious) {
   return value.split(",");
 }
 
+var packageJson = JSON.parse( fs.readFileSync( './package.json'));
+
 program
+  .name("threeify-glsl-transpiler")
+  .version( packageJson.version)
   .option(
     "-p, --projectDir <dirpath>",
     `the root of the project directory tree`
