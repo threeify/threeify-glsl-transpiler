@@ -1,0 +1,13 @@
+{
+  "glsl": {
+    "source": "src",
+    "output": "dist",
+    "includeDirs": ["lib/shaders/includes"],
+    "extensions": ["glsl", "frag", "vert"],
+    "transpiler": {
+      "comments": false,
+      "javascript": true,
+      "verboseLevel": 0
+    }
+  }
+}

@@ -9,29 +9,25 @@ let jsModulePrefix = "export default /* glsl */ `\n";
 let jsModulePostfix = "`;";
 
 export function glslToJavaScriptTranspiler(
-  includeDirectories,
-  sourceDirectory,
   sourceFileName,
-  outputDirectory,
   outputFileName,
-  extensions,
   options
 ) {
   let sourcePath = path.dirname(sourceFileName);
   let sourceCode = fs.readFileSync(sourceFileName, "utf8");
 
   let includeGuardName = sourceFileName
-    .replace(sourceDirectory, "")
+    .replace(options.rootDir, "")
     .replace(/[_./]/gm, "_");
 
   let includeImports = [];
 
   let errors = [];
 
-  let searchExtensions = extensions.map((e) => "." + e);
+  let searchExtensions = options.extensions.map((e) => "." + e);
   searchExtensions.push("");
 
-  if (options.javascript) {
+  if (options.allowJSIncludes) {
     searchExtensions.slice(0).forEach((e) => {
       searchExtensions.push(e + ".ts");
       searchExtensions.push(e + ".jss");
@@ -81,7 +77,7 @@ export function glslToJavaScriptTranspiler(
         return errorMsg;
       } else {
         var includeVar = includeFilePath
-          .replace(sourceDirectory, "")
+          .replace(options.rootDir, "")
           .replace(/[_./]/gm, "_");
         let includeImport = `import ${includeVar} from \'${sourceFileName}.js'`;
         if (includeImports.indexOf(includeImport) < 0) {
@@ -95,7 +91,7 @@ export function glslToJavaScriptTranspiler(
 
   let outputSource = sourceCode;
 
-  if (!options.comments) {
+  if (options.minify) {
     outputSource = outputSource.replace(commentRegex, "");
   }
 
@@ -116,7 +112,7 @@ export function glslToJavaScriptTranspiler(
   );
   outputSource = outputSource.replace(
     includeAbsoluteRegex,
-    includeReplacer(includeDirectories)
+    includeReplacer(options.includeDirs)
   );
 
   let outputModule = includeImports.join("\n");
