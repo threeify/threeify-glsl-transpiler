@@ -16,10 +16,10 @@ The purpose of this is to allow one to use raw glsl files in JavaScript in the m
 ## Usage
 
 ```
-threeify-glsl-transpiler
-Usage: main [options]
+Usage: threeify-glsl-transpiler [options]
 
 Options:
+  -V, --version               output the version number
   -p, --projectDir <dirpath>  the root of the project directory tree
   -r, --rootDir <dirpath>     the root of the source directory tree
   -o, --outDir <dirpath>      the root of the output directory tree
@@ -30,7 +30,7 @@ Options:
   -i, --includeDirs <items>   comma separated list of include directories relative to source root
   -v, --verboseLevel <level>  higher numbers means more output
   -h, --help                  display help for command
-Done in 0.11s.
+Done in 0.10s.
 ```
 
 You can also use a `threeify.json` configuration file in the root of your project:
