@@ -79,7 +79,8 @@ export function glslToJavaScriptTranspiler(
         var includeVar = includeFilePath
           .replace(options.rootDir, "")
           .replace(/[_./]/gm, "_");
-        let includeImport = `import ${includeVar} from \'${sourceFileName}.js'`;
+          var relativeIncludePath = path.relative(sourcePath,includeFilePath);
+           let includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
         if (includeImports.indexOf(includeImport) < 0) {
           // handle multiple imports of the same file
           includeImports.push(includeImport);
@@ -99,7 +100,7 @@ export function glslToJavaScriptTranspiler(
     // remove double+ spaces
     outputSource = outputSource.replace(/[ \t]+/g, ' ');
     // remove spaces between symbols
-    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']', '<', '>','?'];
+    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']','?'];
     for( let i = 0; i < specialChars.length; i ++ ) {
       let lastLength = 0;
       while( lastLength !== outputSource.length ) {
