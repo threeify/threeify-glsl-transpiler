@@ -63,7 +63,7 @@ tgt -r <source directory> -o <output directory>
 To have the transpiler constantly run and transpile files incrementally on change use the watch option:
 
 ```
-tgt --rootDir <source directory> --outDir <output directory> ---watch
+tgt --rootDir <source directory> --outDir <output directory> --watch
 ```
 
 ## Features
