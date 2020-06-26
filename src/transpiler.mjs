@@ -99,7 +99,7 @@ export function glslToJavaScriptTranspiler(
     // remove double+ spaces
     outputSource = outputSource.replace(/[ \t]+/g, ' ');
     // remove spaces between symbols
-    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']', '<', '>','?'];
+    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']','?'];
     for( let i = 0; i < specialChars.length; i ++ ) {
       let lastLength = 0;
       while( lastLength !== outputSource.length ) {
