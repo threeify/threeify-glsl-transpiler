@@ -80,6 +80,9 @@ export function glslToJavaScriptTranspiler(
           .replace(options.rootDir, "")
           .replace(/[_./]/gm, "_");
           var relativeIncludePath = path.relative(sourcePath,includeFilePath);
+          if( relativeIncludePath.indexOf('.') !== 0 ) {
+            relativeIncludePath = "./" + relativeIncludePath;
+          }
            let includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
         if (includeImports.indexOf(includeImport) < 0) {
           // handle multiple imports of the same file
