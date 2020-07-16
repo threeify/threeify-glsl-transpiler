@@ -79,11 +79,11 @@ export function glslToJavaScriptTranspiler(
         var includeVar = includeFilePath
           .replace(options.rootDir, "")
           .replace(/[_./]/gm, "_");
-          var relativeIncludePath = path.relative(sourcePath,includeFilePath);
-          if( relativeIncludePath.indexOf('.') !== 0 ) {
-            relativeIncludePath = "./" + relativeIncludePath;
-          }
-           let includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
+        var relativeIncludePath = path.relative(sourcePath, includeFilePath);
+        if (relativeIncludePath.indexOf(".") !== 0) {
+          relativeIncludePath = "./" + relativeIncludePath;
+        }
+        let includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
         if (includeImports.indexOf(includeImport) < 0) {
           // handle multiple imports of the same file
           includeImports.push(includeImport);
@@ -99,17 +99,42 @@ export function glslToJavaScriptTranspiler(
     // remove comments
     outputSource = outputSource.replace(commentRegex, "");
     // remove unnecessary line ends
-    outputSource = outputSource.replace(/[\r\n]+/g, '\n');
+    outputSource = outputSource.replace(/[\r\n]+/g, "\n");
     // remove double+ spaces
-    outputSource = outputSource.replace(/[ \t]+/g, ' ');
+    outputSource = outputSource.replace(/[ \t]+/g, " ");
     // remove spaces between symbols
-    const specialChars = [ '(', ')', ',', '=', ';', '+', '-', '*', '/', '&', '|', '%', '~', '.', ':', '[', ']','?'];
-    for( let i = 0; i < specialChars.length; i ++ ) {
+    const specialChars = [
+      "(",
+      ")",
+      ",",
+      "=",
+      ";",
+      "+",
+      "-",
+      "*",
+      "/",
+      "&",
+      "|",
+      "%",
+      "~",
+      ".",
+      ":",
+      "[",
+      "]",
+      "?",
+    ];
+    for (let i = 0; i < specialChars.length; i++) {
       let lastLength = 0;
-      while( lastLength !== outputSource.length ) {
+      while (lastLength !== outputSource.length) {
         lastLength = outputSource.length;
-        outputSource = outputSource.replace( specialChars[i] + ' ', specialChars[i]); 
-        outputSource = outputSource.replace( ' ' + specialChars[i], specialChars[i]);
+        outputSource = outputSource.replace(
+          specialChars[i] + " ",
+          specialChars[i]
+        );
+        outputSource = outputSource.replace(
+          " " + specialChars[i],
+          specialChars[i]
+        );
       }
     }
   }

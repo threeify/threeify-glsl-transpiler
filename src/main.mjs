@@ -1,5 +1,5 @@
 #!/bin/sh
-":" //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
+":"; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 
 import program from "commander";
 import fs from "fs";
@@ -13,11 +13,11 @@ function commaSeparatedList(value, dummyPrevious) {
   return value.split(",");
 }
 
-var packageJson = JSON.parse( fs.readFileSync( './package.json'));
+var packageJson = JSON.parse(fs.readFileSync("./package.json"));
 
 program
   .name("threeify-glsl-transpiler")
-  .version( packageJson.version)
+  .version(packageJson.version)
   .option(
     "-p, --projectDir <dirpath>",
     `the root of the project directory tree`
@@ -162,6 +162,10 @@ function inputFileNameToOutputFileName(inputFileName) {
 }
 
 function transpile(sourceFileName) {
+  if (!fs.lstatSync(sourceFileName).isFile()) {
+    return [];
+  }
+
   sourceFileName = path.normalize(sourceFileName);
   var outputFileName = inputFileNameToOutputFileName(sourceFileName);
   let fileErrors = glslToJavaScriptTranspiler(
