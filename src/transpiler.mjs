@@ -30,7 +30,7 @@ export function glslToJavaScriptTranspiler(
   if (options.allowJSIncludes) {
     searchExtensions.slice(0).forEach((e) => {
       searchExtensions.push(e + ".ts");
-      searchExtensions.push(e + ".jss");
+      searchExtensions.push(e + ".js");
     });
   }
 
