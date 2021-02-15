@@ -7,14 +7,14 @@ import glob from "glob";
 import path from "path";
 import process, { exit } from "process";
 import watch from "watch";
-import { Options } from "./Options";
-import { glslToJavaScriptTranspiler } from "./transpiler";
+import { Options } from "./Options.js";
+import { glslToJavaScriptTranspiler } from "./transpiler.js";
 
-function commaSeparatedList(value:string):string[] {
+function commaSeparatedList(value: string): string[] {
   return value.split(",");
 }
 
-var packageJson = JSON.parse(fs.readFileSync("./package.json", 'utf8'));
+var packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 
 program
   .name("threeify-glsl-transpiler")
@@ -58,7 +58,6 @@ function removeUndefined(obj:any): any {
   return ret;
 }*/
 
-
 let options = new Options();
 
 let projectDir = process.cwd();
@@ -68,30 +67,33 @@ if (program.projectDir) {
 
 let tsConfigFilePath = path.join(projectDir, "tsconfig.json");
 if (fs.existsSync(tsConfigFilePath)) {
-  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
+  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, "utf8"));
   if (tsConfig.compilerOptions) {
     if (options.verboseLevel >= 1) {
       console.log(`  inferring setup from ${tsConfigFilePath}.`);
     }
-        options.safeCopy( { rootDir: tsConfig.compilerOptions.rootDir, outDir: tsConfig.compilerOptions.outDir } );
+    options.safeCopy({
+      rootDir: tsConfig.compilerOptions.rootDir,
+      outDir: tsConfig.compilerOptions.outDir,
+    });
   }
 }
 
 let threeifyFilePath = path.join(projectDir, "threeify.json");
 if (fs.existsSync(threeifyFilePath)) {
-  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, 'utf8'));
+  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, "utf8"));
   if (options.verboseLevel >= 1) {
     console.log(`  reading settings from ${threeifyFilePath}.`);
   }
   if (threeifyConfig.glsl) {
-    options.safeCopy( threeifyConfig.glsl );
+    options.safeCopy(threeifyConfig.glsl);
   }
 }
 
 if (options.verboseLevel >= 1) {
   console.log(`  applying command line overrides.`);
 }
-options.safeCopy( program );
+options.safeCopy(program);
 
 if (options.verboseLevel >= 2) {
   console.log(options);
@@ -129,14 +131,14 @@ if (options.verboseLevel >= 2) {
 let numFiles = 0;
 let numErrors = 0;
 
-function inputFileNameToOutputFileName(inputFileName:string):string {
+function inputFileNameToOutputFileName(inputFileName: string): string {
   inputFileName = path.normalize(inputFileName);
   var outputFileName =
     inputFileName.replace(options.rootDir, options.outDir) + ".js";
   return outputFileName;
 }
 
-function transpile(sourceFileName:string): string[] {
+function transpile(sourceFileName: string): string[] {
   if (!fs.lstatSync(sourceFileName).isFile()) {
     return [];
   }
@@ -171,7 +173,7 @@ function transpile(sourceFileName:string): string[] {
   return fileErrors;
 }
 
-function isFileSupported(fileName:string): boolean {
+function isFileSupported(fileName: string): boolean {
   let ext = path.extname(fileName);
   if (ext.length > 1) {
     ext = ext.slice(1);
@@ -197,24 +199,24 @@ glob(globRegex, {}, function (er, sourceFileNames) {
 
   if (program.watch) {
     watch.createMonitor(options.rootDir, function (monitor) {
-      monitor.on("created", function (sourceFileName, stat) {
+      monitor.on("created", function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`created ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           transpile(sourceFileName);
         }
       });
-      monitor.on("changed", function (sourceFileName, curr, prev) {
+      monitor.on("changed", function (sourceFileName: string, curr, prev) {
         if (options.verboseLevel > 1) console.log(`changed ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           transpile(sourceFileName);
         }
       });
-      monitor.on("removed", function (sourceFileName, stat) {
+      monitor.on("removed", function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`removed ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           let outputFileName = inputFileNameToOutputFileName(sourceFileName);
           if (fs.existsSync(outputFileName)) {
-            fs.unlink(outputFileName);
+            fs.unlinkSync(outputFileName);
           }
         }
       });
