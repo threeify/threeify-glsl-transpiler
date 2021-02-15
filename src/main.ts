@@ -7,13 +7,14 @@ import glob from "glob";
 import path from "path";
 import process, { exit } from "process";
 import watch from "watch";
-import { glslToJavaScriptTranspiler } from "./transpiler.mjs";
+import { Options } from "./Options";
+import { glslToJavaScriptTranspiler } from "./transpiler";
 
-function commaSeparatedList(value, dummyPrevious) {
+function commaSeparatedList(value:string):string[] {
   return value.split(",");
 }
 
-var packageJson = JSON.parse(fs.readFileSync("./package.json"));
+var packageJson = JSON.parse(fs.readFileSync("./package.json", 'utf8'));
 
 program
   .name("threeify-glsl-transpiler")
@@ -48,23 +49,17 @@ program
 
 program.parse(process.argv);
 
-function removeUndefined(obj) {
+/*
+function removeUndefined(obj:any): any {
   const ret = {};
   Object.keys(obj)
     .filter((key) => obj[key] !== undefined)
     .forEach((key) => (ret[key] = obj[key]));
   return ret;
-}
+}*/
 
-let options = {
-  rootDir: ".",
-  outDir: "./dist",
-  includeDirs: [],
-  extensions: ["glsl"],
-  minify: false,
-  verboseLevel: 0,
-  allowJSIncludes: false,
-};
+
+let options = new Options();
 
 let projectDir = process.cwd();
 if (program.projectDir) {
@@ -73,50 +68,30 @@ if (program.projectDir) {
 
 let tsConfigFilePath = path.join(projectDir, "tsconfig.json");
 if (fs.existsSync(tsConfigFilePath)) {
-  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath));
+  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
   if (tsConfig.compilerOptions) {
     if (options.verboseLevel >= 1) {
       console.log(`  inferring setup from ${tsConfigFilePath}.`);
     }
-    if (tsConfig.compilerOptions.rootDir) {
-      options.rootDir = tsConfig.compilerOptions.rootDir;
-    }
-    if (tsConfig.compilerOptions.outDir) {
-      options.outDir = tsConfig.compilerOptions.outDir;
-    }
+        options.safeCopy( { rootDir: tsConfig.compilerOptions.rootDir, outDir: tsConfig.compilerOptions.outDir } );
   }
 }
 
 let threeifyFilePath = path.join(projectDir, "threeify.json");
 if (fs.existsSync(threeifyFilePath)) {
-  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath));
+  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, 'utf8'));
   if (options.verboseLevel >= 1) {
     console.log(`  reading settings from ${threeifyFilePath}.`);
   }
   if (threeifyConfig.glsl) {
-    options = Object.assign(options, removeUndefined(threeifyConfig.glsl));
+    options.safeCopy( threeifyConfig.glsl );
   }
 }
 
-let cmdLineOptions = {
-  rootDir: program.rootDir,
-  outDir: program.outDir,
-  includeDirs: program.includeDirs,
-  extensions: program.extension,
-  minify: program.minify,
-  verboseLevel: program.verboseLevel,
-  allowJSIncludes: program.allowJSIncludes,
-};
-
-cmdLineOptions = removeUndefined(cmdLineOptions);
-if (Object.keys(cmdLineOptions).length > 0) {
-  if (options.verboseLevel >= 1) {
-    console.log(`  applying command line overrides.`);
-  }
-  options = Object.assign(options, cmdLineOptions);
+if (options.verboseLevel >= 1) {
+  console.log(`  applying command line overrides.`);
 }
-
-options = Object.assign(options);
+options.safeCopy( program );
 
 if (options.verboseLevel >= 2) {
   console.log(options);
@@ -154,14 +129,14 @@ if (options.verboseLevel >= 2) {
 let numFiles = 0;
 let numErrors = 0;
 
-function inputFileNameToOutputFileName(inputFileName) {
+function inputFileNameToOutputFileName(inputFileName:string):string {
   inputFileName = path.normalize(inputFileName);
   var outputFileName =
     inputFileName.replace(options.rootDir, options.outDir) + ".js";
   return outputFileName;
 }
 
-function transpile(sourceFileName) {
+function transpile(sourceFileName:string): string[] {
   if (!fs.lstatSync(sourceFileName).isFile()) {
     return [];
   }
@@ -196,7 +171,7 @@ function transpile(sourceFileName) {
   return fileErrors;
 }
 
-function isFileSupported(fileName) {
+function isFileSupported(fileName:string): boolean {
   let ext = path.extname(fileName);
   if (ext.length > 1) {
     ext = ext.slice(1);

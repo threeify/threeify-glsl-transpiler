@@ -9,3 +9,4 @@ dist
 .idea  
 # docker environment variables
 .env    
+package.json

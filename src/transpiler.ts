@@ -1,17 +1,17 @@
 import fs from "fs";
 import makeDir from "make-dir";
 import path from "path";
+import { stripComments, stripUnnecessaryLineEndings, stripUnnecessarySpaces } from "./minification";
 
 let includeLocalRegex = /^[ \t]*#(?:pragma +)?include +["]([\w\d./]+)["]/gm; // modified from three.js
 let includeAbsoluteRegex = /^[ \t]*#(?:pragma +)?include +[<]([\w\d./]+)[>]/gm; // modified from three.js
-let commentRegex = /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm; // https://stackoverflow.com/a/15123777
 let jsModulePrefix = "export default /* glsl */ `\n";
 let jsModulePostfix = "`;";
 
 export function glslToJavaScriptTranspiler(
-  sourceFileName,
-  outputFileName,
-  options
+  sourceFileName:string,
+  outputFileName:string,
+  options:any
 ) {
   let sourcePath = path.dirname(sourceFileName);
   let sourceCode = fs.readFileSync(sourceFileName, "utf8");
@@ -20,9 +20,9 @@ export function glslToJavaScriptTranspiler(
     .replace(options.rootDir, "")
     .replace(/[_./]/gm, "_");
 
-  let includeImports = [];
+  let includeImports:string[] = [];
 
-  let errors = [];
+  let errors:string[] = [];
 
   let searchExtensions = options.extensions.map((e) => "." + e);
   searchExtensions.push("");
@@ -34,8 +34,8 @@ export function glslToJavaScriptTranspiler(
     });
   }
 
-  function includeReplacer(searchDirectories) {
-    return function (match, sourceFileName) {
+  function includeReplacer(searchDirectories:string[]) {
+    return function (match:String, sourceFileName:string) {
       //console.log(
       //  "-----------------------------------------------------------------------"
       //);
@@ -51,13 +51,13 @@ export function glslToJavaScriptTranspiler(
       let directories = searchDirectories.slice(0);
       // directories.push(sourcePath);
 
-      let pathsAttempted = [];
-      var includeFilePath = undefined;
-      directories.forEach((directory) => {
+      let pathsAttempted:string[] = [];
+      var includeFilePath:string|undefined = undefined;
+      directories.forEach((directory: string) => {
         let testIncludeFilePath = path.normalize(
           path.join(directory, sourceFileName)
         );
-        searchExtensions.forEach((extension) => {
+        searchExtensions.forEach((extension:string) => {
           let test2IncludeFilePath = testIncludeFilePath + extension;
           pathsAttempted.push(test2IncludeFilePath);
           if (fs.existsSync(test2IncludeFilePath)) {
@@ -96,47 +96,9 @@ export function glslToJavaScriptTranspiler(
   let outputSource = sourceCode;
 
   if (options.minify) {
-    // remove comments
-    outputSource = outputSource.replace(commentRegex, "");
-    // remove unnecessary line ends
-    outputSource = outputSource.replace(/[\r\n]+/g, "\n");
-    // remove double+ spaces
-    outputSource = outputSource.replace(/[ \t]+/g, " ");
-    // remove spaces between symbols
-    const specialChars = [
-      "(",
-      ")",
-      ",",
-      "=",
-      ";",
-      "+",
-      "-",
-      "*",
-      "/",
-      "&",
-      "|",
-      "%",
-      "~",
-      ".",
-      ":",
-      "[",
-      "]",
-      "?",
-    ];
-    for (let i = 0; i < specialChars.length; i++) {
-      let lastLength = 0;
-      while (lastLength !== outputSource.length) {
-        lastLength = outputSource.length;
-        outputSource = outputSource.replace(
-          specialChars[i] + " ",
-          specialChars[i]
-        );
-        outputSource = outputSource.replace(
-          " " + specialChars[i],
-          specialChars[i]
-        );
-      }
-    }
+    outputSource = stripComments( outputSource );
+    outputSource = stripUnnecessaryLineEndings( outputSource)
+    outputSource = stripUnnecessarySpaces( outputSource );
   }
 
   if (sourceCode.indexOf("#pragma once") >= 0) {
