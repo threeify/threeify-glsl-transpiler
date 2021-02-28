@@ -27,10 +27,8 @@ Options:
   -j, --allowJSIncludes       allow referencing javascript and typescript code via includes
   -m, --minify                reduce the size of the glsl code
   -e, --extensions <items>    comma separated list of extensions to transpile
-  -i, --includeDirs <items>   comma separated list of include directories relative to source root
   -v, --verboseLevel <level>  higher numbers means more output
   -h, --help                  display help for command
-Done in 0.10s.
 ```
 
 You can also use a `threeify.json` configuration file in the root of your project:
@@ -40,7 +38,6 @@ You can also use a `threeify.json` configuration file in the root of your projec
   "glsl": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "includeDirs": ["lib/shaders/includes"],
     "extensions": ["glsl", "frag", "vert"],
     "minify": true,
     "allowJSIncludes": true,
@@ -55,7 +52,7 @@ Just run it to transform all glsl files from the input directory into the corres
 glsl.js JavaScript modules in the output directory.
 
 ```
-tgt -r <source directory> -o <output directory>
+yarn start -p ../threeify
 ```
 
 ### Watch
@@ -63,7 +60,7 @@ tgt -r <source directory> -o <output directory>
 To have the transpiler constantly run and transpile files incrementally on change use the watch option:
 
 ```
-tgt --rootDir <source directory> --outDir <output directory> --watch
+yarn start -p ../threeify -w
 ```
 
 ## Features
