@@ -42,18 +42,18 @@ export function glslToJavaScriptTranspiler(
 
   function includeReplacer(searchDirectories: string[]) {
     return function (match: String, sourceFileName: string) {
-      //console.log(
-      //  "-----------------------------------------------------------------------"
-      //);
-      //console.log("resolving:", match);
-      if (!sourceFileName) return "";
+      console.log(
+        "-----------------------------------------------------------------------"
+      );
+      console.log("resolving:", match);
+      console.log( `sourceFileName ${sourceFileName}` );
+ if (!sourceFileName) return "";
 
       /*if (includeFileName.indexOf(".glsl") < 0) {
       // auto add glsl extension if it is missing.
       includeFileName += ".glsl";
     }*/
-      //console.log( `includeFileName ${includeFileName}` );
-
+     
       let directories = searchDirectories.slice(0);
       // directories.push(sourcePath);
 
@@ -95,7 +95,9 @@ export function glslToJavaScriptTranspiler(
         // handle multiple imports of the same file
         includeImports.push(includeImport);
       }
-      return "${" + includeVar + "}";
+      let result = "${" + includeVar + "}";
+      console.log("result:", result);
+      return result;
     };
   }
 
@@ -121,6 +123,11 @@ export function glslToJavaScriptTranspiler(
   outputSource = outputSource.replace(
     includeLocalRegex,
     includeReplacer([sourcePath])
+  );
+
+  outputSource = outputSource.replace(
+    includeAbsoluteRegex,
+    includeReplacer([options.rootDir])
   );
 
   let outputModule = includeImports.join("\n");

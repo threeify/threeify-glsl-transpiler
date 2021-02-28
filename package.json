@@ -1,6 +1,6 @@
 {
   "name": "threeify-glsl-transpiler",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A glsl to JS module transpiler.",
   "keywords": [
     "glsl",
@@ -22,7 +22,7 @@
   "main": "./src/main.ts",
   "module": "./src/main.ts",
   "scripts": {
-    "start": "tsc && node ./dist/main.js"
+    "start": "npx tsc && node ./dist/main.js"
   },
   "devDependencies": {
     "eslint": "^7.20.0",
