@@ -122,10 +122,6 @@ export function glslToJavaScriptTranspiler(
     includeLocalRegex,
     includeReplacer([sourcePath])
   );
-  outputSource = outputSource.replace(
-    includeAbsoluteRegex,
-    includeReplacer(options.includeDirs)
-  );
 
   let outputModule = includeImports.join("\n");
   if (outputModule.length > 0) {

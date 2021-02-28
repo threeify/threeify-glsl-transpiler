@@ -1,3 +1,0 @@
-yarn run v1.22.10
-$ tsc & node ./dist/main.js
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

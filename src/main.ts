@@ -37,11 +37,6 @@ program
     commaSeparatedList
   )
   .option(
-    "-i, --includeDirs <items>",
-    "comma separated list of include directories relative to source root",
-    commaSeparatedList
-  )
-  .option(
     "-v, --verboseLevel <level>",
     `higher numbers means more output`,
     parseInt
@@ -60,6 +55,8 @@ function removeUndefined(obj:any): any {
 
 let options = new Options();
 
+console.log("fresh options");
+console.log(options);
 let projectDir = process.cwd();
 if (program.projectDir) {
   projectDir = program.projectDir;
@@ -76,6 +73,9 @@ if (fs.existsSync(tsConfigFilePath)) {
       rootDir: tsConfig.compilerOptions.rootDir,
       outDir: tsConfig.compilerOptions.outDir,
     });
+
+    console.log("merge in tsconfig");
+    console.log(options);
   }
 }
 
@@ -87,6 +87,8 @@ if (fs.existsSync(threeifyFilePath)) {
   }
   if (threeifyConfig.glsl) {
     options.safeCopy(threeifyConfig.glsl);
+    console.log("merge in threeify config");
+    console.log(options);
   }
 }
 
@@ -94,6 +96,8 @@ if (options.verboseLevel >= 1) {
   console.log(`  applying command line overrides.`);
 }
 options.safeCopy(program);
+console.log("merge in cmd line");
+console.log(options);
 
 if (options.verboseLevel >= 2) {
   console.log(options);
@@ -116,13 +120,6 @@ if (!options.outDir) {
 
 options.rootDir = path.normalize(path.join(projectDir, options.rootDir));
 options.outDir = path.normalize(path.join(projectDir, options.outDir));
-
-options.includeDirs = options.includeDirs.map((includeDir) =>
-  path.join(options.rootDir, includeDir)
-);
-if (options.includeDirs.length === 0) {
-  options.includeDirs.push(options.rootDir);
-}
 
 if (options.verboseLevel >= 2) {
   console.log(options);
@@ -154,20 +151,16 @@ function transpile(sourceFileName: string): string[] {
   if (fileErrors.length > 0) {
     numErrors++;
     console.error(
-      `  ${path.basename(sourceFileName)} --> ${path.basename(
-        outputFileName
-      )}: ${fileErrors.length} Errors.`
+      `  ${sourceFileName} --> ${path.basename(outputFileName)}: ${
+        fileErrors.length
+      } Errors.`
     );
     fileErrors.forEach((error) => {
       console.error(`    ${error}`);
     });
   } else {
     if (options.verboseLevel >= 1) {
-      console.log(
-        `  ${path.basename(sourceFileName)} --> ${path.basename(
-          outputFileName
-        )}`
-      );
+      console.log(`  ${sourceFileName} --> ${path.basename(outputFileName)}`);
     }
   }
   return fileErrors;

@@ -66,7 +66,6 @@ function parseInteger(token: any, defaultValue: number): number {
 export class Options {
   rootDir: string = ".";
   outDir: string = "./dist";
-  includeDirs: string[] = [];
   extensions: string[] = ["glsl"];
   minify: boolean = false;
   verboseLevel: number = 0;
@@ -76,7 +75,6 @@ export class Options {
     this.rootDir = parseString(json.rootDir, this.rootDir);
     this.outDir = parseString(json.outDir, this.outDir);
 
-    this.includeDirs.concat(parseStringArray(json.includeDirs, []));
     this.extensions.concat(parseStringArray(json.extensions, []));
     this.minify = parseBoolean(json.minify, this.minify);
     this.verboseLevel = parseInteger(json.verboseLevel, this.verboseLevel);

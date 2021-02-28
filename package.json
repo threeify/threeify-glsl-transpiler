@@ -22,7 +22,7 @@
   "main": "./src/main.ts",
   "module": "./src/main.ts",
   "scripts": {
-    "start": "tsc & node ./dist/main.js"
+    "start": "tsc && node ./dist/main.js"
   },
   "devDependencies": {
     "eslint": "^7.20.0",
