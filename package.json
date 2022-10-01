@@ -19,10 +19,13 @@
   "bin": {
     "tgt": "./src/main.ts"
   },
-  "main": "./src/main.ts",
-  "module": "./src/main.ts",
+  "main": "dist/lib",
+  "types": "dist/lib/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "npx tsc && node ./dist/main.js"
+    "start": "npx tsc && node ./dist/index.js"
   },
   "devDependencies": {
     "eslint": "^7.20.0",

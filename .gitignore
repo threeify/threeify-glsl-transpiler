@@ -11,3 +11,4 @@ dist
 .env    
 package.json
 log.txt
+*.log

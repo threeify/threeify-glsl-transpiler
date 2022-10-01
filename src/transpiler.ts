@@ -127,8 +127,9 @@ export function glslToJavaScriptTranspiler(
 
   outputSource = outputSource.replace(
     includeAbsoluteRegex,
-    includeReplacer([options.rootDir])
+    includeReplacer([options.rootDir].concat( options.includeDirs ))
   );
+
 
   let outputModule = includeImports.join("\n");
   if (outputModule.length > 0) {

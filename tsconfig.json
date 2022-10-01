@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "es2015",
+    "target": "es2020",
+    "module": "es2020",
     "declaration": true,
     "sourceMap": true,
     "declarationMap": true,
@@ -13,9 +13,19 @@
     "moduleResolution": "node",
     "removeComments": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": false
   },
   "include": [
     "src/**/*.ts"
-  ]
+  ],
+  "exclude": [
+    "*.test.ts"
+  ],
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "./docs",
+    "gaID": "UA-172098276-1",
+    "gaID": "threeify.org"
+  }
 }

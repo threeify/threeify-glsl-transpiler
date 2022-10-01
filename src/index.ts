@@ -24,6 +24,7 @@ program
     `the root of the project directory tree`
   )
   .option("-r, --rootDir <dirpath>", `the root of the source directory tree`)
+  .option("-i", "--includeDirs <dirpaths>", "a series of comma separated include directories")
   .option("-o, --outDir <dirpath>", `the root of the output directory tree`)
   .option("-w, --watch", `watch and incremental transpile any changed files`)
   .option(
@@ -120,7 +121,7 @@ if (!options.outDir) {
 
 options.rootDir = path.normalize(path.join(projectDir, options.rootDir));
 options.outDir = path.normalize(path.join(projectDir, options.outDir));
-
+options.includeDirs = options.includeDirs.map( includeDir => path.normalize(path.join(projectDir, includeDir)) );
 if (options.verboseLevel >= 2) {
   console.log(options);
 }
