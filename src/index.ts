@@ -13,7 +13,7 @@ function commaSeparatedList(value: string): string[] {
   return value.split(',');
 }
 
-var packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
 program
   .name('threeify-glsl-transpiler')
@@ -57,7 +57,7 @@ function removeUndefined(obj:any): any {
   return ret;
 }*/
 
-let options = new Options();
+const options = new Options();
 
 //console.log('fresh options');
 //console.log(options);
@@ -69,9 +69,9 @@ if (programOptions.projectDir) {
   projectDir = programOptions.projectDir;
 }
 
-let tsConfigFilePath = path.join(projectDir, 'tsconfig.json');
+const tsConfigFilePath = path.join(projectDir, 'tsconfig.json');
 if (fs.existsSync(tsConfigFilePath)) {
-  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
+  const tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
   if (tsConfig.compilerOptions) {
     if (options.verboseLevel >= 1) {
       console.log(`  inferring setup from ${tsConfigFilePath}.`);
@@ -86,7 +86,7 @@ if (fs.existsSync(tsConfigFilePath)) {
   }
 }
 
-let threeifyFilePath = path.join(projectDir, 'threeify.json');
+const threeifyFilePath = path.join(projectDir, 'threeify.json');
 if (fs.existsSync(threeifyFilePath)) {
   const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, 'utf8'));
   if (options.verboseLevel >= 1) {
@@ -139,7 +139,7 @@ let numErrors = 0;
 
 function inputFileNameToOutputFileName(inputFileName: string): string {
   inputFileName = path.normalize(inputFileName);
-  var outputFileName =
+  const outputFileName =
     inputFileName.replace(options.rootDir, options.outDir) + '.js';
   return outputFileName;
 }
@@ -150,8 +150,8 @@ function transpile(sourceFileName: string): string[] {
   }
 
   sourceFileName = path.normalize(sourceFileName);
-  var outputFileName = inputFileNameToOutputFileName(sourceFileName);
-  let fileErrors = glslToJavaScriptTranspiler(
+  const outputFileName = inputFileNameToOutputFileName(sourceFileName);
+  const fileErrors = glslToJavaScriptTranspiler(
     sourceFileName,
     outputFileName,
     options
@@ -160,7 +160,8 @@ function transpile(sourceFileName: string): string[] {
   if (fileErrors.length > 0) {
     numErrors++;
     console.error(
-      `  ${sourceFileName} --> ${path.basename(outputFileName)}: ${fileErrors.length
+      `  ${sourceFileName} --> ${path.basename(outputFileName)}: ${
+        fileErrors.length
       } Errors.`
     );
     fileErrors.forEach((error) => {
@@ -179,13 +180,13 @@ function isFileSupported(fileName: string): boolean {
   if (ext.length > 1) {
     ext = ext.slice(1);
   }
-  let result = options.extensions.includes(ext.toLowerCase());
+  const result = options.extensions.includes(ext.toLowerCase());
   return result;
 }
 
 // options is optional
-let extGlob = options.extensions.join('|');
-let globRegex = `${options.rootDir}/**/*.+(${extGlob})`;
+const extGlob = options.extensions.join('|');
+const globRegex = `${options.rootDir}/**/*.+(${extGlob})`;
 
 glob(globRegex, {}, function (er, sourceFileNames) {
   sourceFileNames.forEach((inputFileName) => {
@@ -215,7 +216,7 @@ glob(globRegex, {}, function (er, sourceFileNames) {
       monitor.on('removed', function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`removed ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
-          let outputFileName = inputFileNameToOutputFileName(sourceFileName);
+          const outputFileName = inputFileNameToOutputFileName(sourceFileName);
           if (fs.existsSync(outputFileName)) {
             fs.unlinkSync(outputFileName);
           }

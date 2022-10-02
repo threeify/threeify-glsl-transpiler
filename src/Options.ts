@@ -13,7 +13,7 @@ function parseStringArray(token: any, defaultValue: string[]): string[] {
     return defaultValue;
   }
   if (typeof token === 'object') {
-    let result: string[] = [];
+    const result: string[] = [];
     token.forEach((value: any, index: any) => {
       //console.log(value, index);
       result.push(parseString(value, ''));
@@ -64,13 +64,13 @@ function parseInteger(token: any, defaultValue: number): number {
 }
 
 export class Options {
-  rootDir: string = '.';
+  rootDir = '.';
   includeDirs: string[] = [];
-  outDir: string = './dist';
+  outDir = './dist';
   extensions: string[] = ['glsl'];
-  minify: boolean = false;
-  verboseLevel: number = 0;
-  allowJSIncludes: boolean = false;
+  minify = false;
+  verboseLevel = 0;
+  allowJSIncludes = false;
 
   safeCopy(json: any) {
     this.rootDir = parseString(json.rootDir, this.rootDir);

@@ -7,28 +7,29 @@ import {
   stripUnnecessarySpaces
 } from './minification.js';
 
-let includeLocalRegex = /^[ \t]*#(?:pragma +)?include +["]([\w\d./]+)["]/gm; // modified from three.js
-let includeAbsoluteRegex = /^[ \t]*#(?:pragma +)?include +[<]([\w\d./]+)[>]/gm; // modified from three.js
-let jsModulePrefix = 'export default /* glsl */ `\n';
-let jsModulePostfix = '`;';
+const includeLocalRegex = /^[ \t]*#(?:pragma +)?include +["]([\w\d./]+)["]/gm; // modified from three.js
+const includeAbsoluteRegex =
+  /^[ \t]*#(?:pragma +)?include +[<]([\w\d./]+)[>]/gm; // modified from three.js
+const jsModulePrefix = 'export default /* glsl */ `\n';
+const jsModulePostfix = '`;';
 
 export function glslToJavaScriptTranspiler(
   sourceFileName: string,
   outputFileName: string,
   options: any
 ) {
-  let sourcePath = path.dirname(sourceFileName);
-  let sourceCode = fs.readFileSync(sourceFileName, 'utf8');
+  const sourcePath = path.dirname(sourceFileName);
+  const sourceCode = fs.readFileSync(sourceFileName, 'utf8');
 
-  let includeGuardName = sourceFileName
+  const includeGuardName = sourceFileName
     .replace(options.rootDir, '')
     .replace(/[_./]/gm, '_');
 
-  let includeImports: string[] = [];
+  const includeImports: string[] = [];
 
-  let errors: string[] = [];
+  const errors: string[] = [];
 
-  let searchExtensions = options.extensions.map(
+  const searchExtensions = options.extensions.map(
     (extension: string) => '.' + extension
   );
   searchExtensions.push('');
@@ -41,7 +42,7 @@ export function glslToJavaScriptTranspiler(
   }
 
   function includeReplacer(searchDirectories: string[]) {
-    return function (match: String, sourceFileName: string) {
+    return function (match: string, sourceFileName: string) {
       //console.log(
       //  '-----------------------------------------------------------------------'
       //);
@@ -54,17 +55,17 @@ export function glslToJavaScriptTranspiler(
       includeFileName += ".glsl";
     }*/
 
-      let directories = searchDirectories.slice(0);
+      const directories = searchDirectories.slice(0);
       // directories.push(sourcePath);
 
-      let pathsAttempted: string[] = [];
-      var includeFilePath: string = '';
+      const pathsAttempted: string[] = [];
+      let includeFilePath = '';
       directories.forEach((directory: string) => {
-        let testIncludeFilePath = path.normalize(
+        const testIncludeFilePath = path.normalize(
           path.join(directory, sourceFileName)
         );
         searchExtensions.forEach((extension: string) => {
-          let test2IncludeFilePath = testIncludeFilePath + extension;
+          const test2IncludeFilePath = testIncludeFilePath + extension;
           pathsAttempted.push(test2IncludeFilePath);
           if (fs.existsSync(test2IncludeFilePath)) {
             includeFilePath = test2IncludeFilePath;
@@ -83,19 +84,19 @@ export function glslToJavaScriptTranspiler(
         return errorMsg;
       }
 
-      var includeVar = includeFilePath
+      const includeVar = includeFilePath
         .replace(options.rootDir, '')
         .replace(/[_./]/gm, '_');
-      var relativeIncludePath = path.relative(sourcePath, includeFilePath);
+      let relativeIncludePath = path.relative(sourcePath, includeFilePath);
       if (relativeIncludePath.indexOf('.') !== 0) {
         relativeIncludePath = './' + relativeIncludePath;
       }
-      let includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
+      const includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
       if (includeImports.indexOf(includeImport) < 0) {
         // handle multiple imports of the same file
         includeImports.push(includeImport);
       }
-      let result = '${' + includeVar + '}';
+      const result = '${' + includeVar + '}';
       //console.log('result:', result);
       return result;
     };
@@ -110,8 +111,8 @@ export function glslToJavaScriptTranspiler(
   }
 
   if (sourceCode.indexOf('#pragma once') >= 0) {
-    let includeGuardPrefix = `#ifndef ${includeGuardName}\n#define ${includeGuardName}\n`;
-    let includeGuardPostfix = `\n\n#endif // end of include guard`;
+    const includeGuardPrefix = `#ifndef ${includeGuardName}\n#define ${includeGuardName}\n`;
+    const includeGuardPostfix = `\n\n#endif // end of include guard`;
 
     outputSource =
       includeGuardPrefix +
@@ -136,7 +137,7 @@ export function glslToJavaScriptTranspiler(
   }
   outputModule += jsModulePrefix + outputSource + '\n' + jsModulePostfix;
 
-  let outputPath = path.dirname(outputFileName);
+  const outputPath = path.dirname(outputFileName);
   if (!fs.existsSync(outputPath)) {
     makeDir.sync(outputPath);
   }

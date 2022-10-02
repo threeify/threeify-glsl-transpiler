@@ -27,13 +27,14 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npx tsc && node ./dist/index.js",
-    "lint": "eslint \"src/**\"",
-    "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write"
+    "lint": "eslint \"src/**/*.{ts,json}\"",
+    "prettier-format": "prettier --config .prettierrc \"src/**/*.{ts,json}\" --write"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
     "@types/jest": "^29.1.1",
     "@types/watch": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.7.1",
