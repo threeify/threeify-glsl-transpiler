@@ -42,11 +42,11 @@ export function glslToJavaScriptTranspiler(
 
   function includeReplacer(searchDirectories: string[]) {
     return function (match: String, sourceFileName: string) {
-      console.log(
-        '-----------------------------------------------------------------------'
-      );
-      console.log('resolving:', match);
-      console.log(`sourceFileName ${sourceFileName}`);
+      //console.log(
+      //  '-----------------------------------------------------------------------'
+      //);
+      //console.log('resolving:', match);
+      //console.log(`sourceFileName ${sourceFileName}`);
       if (!sourceFileName) return '';
 
       /*if (includeFileName.indexOf(".glsl") < 0) {
@@ -96,7 +96,7 @@ export function glslToJavaScriptTranspiler(
         includeImports.push(includeImport);
       }
       let result = '${' + includeVar + '}';
-      console.log('result:', result);
+      //console.log('result:', result);
       return result;
     };
   }

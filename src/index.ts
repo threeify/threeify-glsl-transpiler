@@ -1,7 +1,6 @@
 #!/bin/sh
 ':'; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
-
-import program from 'commander';
+import { program } from 'commander';
 import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
@@ -60,11 +59,14 @@ function removeUndefined(obj:any): any {
 
 let options = new Options();
 
-console.log('fresh options');
-console.log(options);
+//console.log('fresh options');
+//console.log(options);
 let projectDir = process.cwd();
-if (program.projectDir) {
-  projectDir = program.projectDir;
+
+const programOptions = program.opts();
+
+if (programOptions.projectDir) {
+  projectDir = programOptions.projectDir;
 }
 
 let tsConfigFilePath = path.join(projectDir, 'tsconfig.json');
@@ -79,8 +81,8 @@ if (fs.existsSync(tsConfigFilePath)) {
       outDir: tsConfig.compilerOptions.outDir
     });
 
-    console.log('merge in tsconfig');
-    console.log(options);
+    //console.log('merge in tsconfig');
+    //console.log(options);
   }
 }
 
@@ -92,8 +94,8 @@ if (fs.existsSync(threeifyFilePath)) {
   }
   if (threeifyConfig.glsl) {
     options.safeCopy(threeifyConfig.glsl);
-    console.log('merge in threeify config');
-    console.log(options);
+    //console.log('merge in threeify config');
+    //console.log(options);
   }
 }
 
@@ -101,8 +103,8 @@ if (options.verboseLevel >= 1) {
   console.log(`  applying command line overrides.`);
 }
 options.safeCopy(program);
-console.log('merge in cmd line');
-console.log(options);
+//console.log('merge in cmd line');
+//console.log(options);
 
 if (options.verboseLevel >= 2) {
   console.log(options);
@@ -158,8 +160,7 @@ function transpile(sourceFileName: string): string[] {
   if (fileErrors.length > 0) {
     numErrors++;
     console.error(
-      `  ${sourceFileName} --> ${path.basename(outputFileName)}: ${
-        fileErrors.length
+      `  ${sourceFileName} --> ${path.basename(outputFileName)}: ${fileErrors.length
       } Errors.`
     );
     fileErrors.forEach((error) => {
@@ -197,7 +198,7 @@ glob(globRegex, {}, function (er, sourceFileNames) {
   }
   console.log(`${numFiles - numErrors} files transpile successfully.`);
 
-  if (program.watch) {
+  if (programOptions.watch) {
     watch.createMonitor(options.rootDir, function (monitor) {
       monitor.on('created', function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`created ${sourceFileName}`);

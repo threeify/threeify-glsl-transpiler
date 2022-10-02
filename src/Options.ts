@@ -15,7 +15,7 @@ function parseStringArray(token: any, defaultValue: string[]): string[] {
   if (typeof token === 'object') {
     let result: string[] = [];
     token.forEach((value: any, index: any) => {
-      console.log(value, index);
+      //console.log(value, index);
       result.push(parseString(value, ''));
     });
     // remove empty values.
