@@ -1,4 +1,5 @@
 #!/bin/sh
+/* eslint-disable no-console */
 ':'; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 import { program } from 'commander';
 import fs from 'fs';
