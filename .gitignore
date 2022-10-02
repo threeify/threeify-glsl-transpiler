@@ -12,3 +12,5 @@ dist
 package.json
 log.txt
 *.log
+
+package-lock.json
