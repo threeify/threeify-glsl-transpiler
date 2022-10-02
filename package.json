@@ -28,7 +28,7 @@
     "build": "npx tsc",
     "start": "npx tsc && node ./dist/index.js",
     "lint": "eslint \"src/**/*.{ts,json}\"",
-    "prettier-format": "prettier --config .prettierrc \"src/**/*.{ts,json}\" --write"
+    "prettier-format": "prettier --config .prettierrc \"src/**/*.{ts,json,html}\" --write"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
