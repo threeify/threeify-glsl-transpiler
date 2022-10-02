@@ -2,7 +2,7 @@ function parseString(token: any, defaultValue: string): string {
   if (token === undefined) {
     return defaultValue;
   }
-  if (typeof token === "string") {
+  if (typeof token === 'string') {
     return token;
   }
   throw new Error(`unhandled string value: "${token}"`);
@@ -12,14 +12,14 @@ function parseStringArray(token: any, defaultValue: string[]): string[] {
   if (token === undefined) {
     return defaultValue;
   }
-  if (typeof token === "object") {
+  if (typeof token === 'object') {
     let result: string[] = [];
     token.forEach((value: any, index: any) => {
       console.log(value, index);
-      result.push(parseString(value, ""));
+      result.push(parseString(value, ''));
     });
     // remove empty values.
-    return result.filter((value) => value !== "");
+    return result.filter((value) => value !== '');
   }
   throw new Error(`unhandled string array value: "${token}"`);
 }
@@ -28,21 +28,21 @@ function parseBoolean(token: any, defaultValue: boolean): boolean {
   if (token === undefined) {
     return defaultValue;
   }
-  if (typeof token === "boolean") {
+  if (typeof token === 'boolean') {
     return token;
   }
-  if (typeof token === "string") {
+  if (typeof token === 'string') {
     if (
-      token.toLowerCase() === "true" ||
-      token === "1" ||
-      token.toLowerCase() === "t"
+      token.toLowerCase() === 'true' ||
+      token === '1' ||
+      token.toLowerCase() === 't'
     ) {
       return true;
     }
     if (
-      token.toLowerCase() === "false" ||
-      token === "0" ||
-      token.toLowerCase() === "f"
+      token.toLowerCase() === 'false' ||
+      token === '0' ||
+      token.toLowerCase() === 'f'
     ) {
       return false;
     }
@@ -54,20 +54,20 @@ function parseInteger(token: any, defaultValue: number): number {
   if (token === undefined) {
     return defaultValue;
   }
-  if (typeof token === "number") {
+  if (typeof token === 'number') {
     return token;
   }
-  if (typeof token === "string") {
+  if (typeof token === 'string') {
     return parseInt(token);
   }
   throw new Error(`unhandled integer value: "${token}"`);
 }
 
 export class Options {
-  rootDir: string = ".";
+  rootDir: string = '.';
   includeDirs: string[] = [];
-  outDir: string = "./dist";
-  extensions: string[] = ["glsl"];
+  outDir: string = './dist';
+  extensions: string[] = ['glsl'];
   minify: boolean = false;
   verboseLevel: number = 0;
   allowJSIncludes: boolean = false;

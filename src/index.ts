@@ -1,44 +1,48 @@
 #!/bin/sh
-":"; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
+':'; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 
-import program from "commander";
-import fs from "fs";
-import glob from "glob";
-import path from "path";
-import process, { exit } from "process";
-import watch from "watch";
-import { Options } from "./Options.js";
-import { glslToJavaScriptTranspiler } from "./transpiler.js";
+import program from 'commander';
+import fs from 'fs';
+import glob from 'glob';
+import path from 'path';
+import process, { exit } from 'process';
+import watch from 'watch';
+import { Options } from './Options.js';
+import { glslToJavaScriptTranspiler } from './transpiler.js';
 
 function commaSeparatedList(value: string): string[] {
-  return value.split(",");
+  return value.split(',');
 }
 
-var packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+var packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
 program
-  .name("threeify-glsl-transpiler")
+  .name('threeify-glsl-transpiler')
   .version(packageJson.version)
   .option(
-    "-p, --projectDir <dirpath>",
+    '-p, --projectDir <dirpath>',
     `the root of the project directory tree`
   )
-  .option("-r, --rootDir <dirpath>", `the root of the source directory tree`)
-  .option("-i", "--includeDirs <dirpaths>", "a series of comma separated include directories")
-  .option("-o, --outDir <dirpath>", `the root of the output directory tree`)
-  .option("-w, --watch", `watch and incremental transpile any changed files`)
+  .option('-r, --rootDir <dirpath>', `the root of the source directory tree`)
   .option(
-    "-j, --allowJSIncludes",
+    '-i',
+    '--includeDirs <dirpaths>',
+    'a series of comma separated include directories'
+  )
+  .option('-o, --outDir <dirpath>', `the root of the output directory tree`)
+  .option('-w, --watch', `watch and incremental transpile any changed files`)
+  .option(
+    '-j, --allowJSIncludes',
     `allow referencing javascript and typescript code via includes`
   )
-  .option("-m, --minify", `reduce the size of the glsl code`)
+  .option('-m, --minify', `reduce the size of the glsl code`)
   .option(
-    "-e, --extensions <items>",
-    "comma separated list of extensions to transpile",
+    '-e, --extensions <items>',
+    'comma separated list of extensions to transpile',
     commaSeparatedList
   )
   .option(
-    "-v, --verboseLevel <level>",
+    '-v, --verboseLevel <level>',
     `higher numbers means more output`,
     parseInt
   );
@@ -56,39 +60,39 @@ function removeUndefined(obj:any): any {
 
 let options = new Options();
 
-console.log("fresh options");
+console.log('fresh options');
 console.log(options);
 let projectDir = process.cwd();
 if (program.projectDir) {
   projectDir = program.projectDir;
 }
 
-let tsConfigFilePath = path.join(projectDir, "tsconfig.json");
+let tsConfigFilePath = path.join(projectDir, 'tsconfig.json');
 if (fs.existsSync(tsConfigFilePath)) {
-  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, "utf8"));
+  var tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
   if (tsConfig.compilerOptions) {
     if (options.verboseLevel >= 1) {
       console.log(`  inferring setup from ${tsConfigFilePath}.`);
     }
     options.safeCopy({
       rootDir: tsConfig.compilerOptions.rootDir,
-      outDir: tsConfig.compilerOptions.outDir,
+      outDir: tsConfig.compilerOptions.outDir
     });
 
-    console.log("merge in tsconfig");
+    console.log('merge in tsconfig');
     console.log(options);
   }
 }
 
-let threeifyFilePath = path.join(projectDir, "threeify.json");
+let threeifyFilePath = path.join(projectDir, 'threeify.json');
 if (fs.existsSync(threeifyFilePath)) {
-  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, "utf8"));
+  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, 'utf8'));
   if (options.verboseLevel >= 1) {
     console.log(`  reading settings from ${threeifyFilePath}.`);
   }
   if (threeifyConfig.glsl) {
     options.safeCopy(threeifyConfig.glsl);
-    console.log("merge in threeify config");
+    console.log('merge in threeify config');
     console.log(options);
   }
 }
@@ -97,7 +101,7 @@ if (options.verboseLevel >= 1) {
   console.log(`  applying command line overrides.`);
 }
 options.safeCopy(program);
-console.log("merge in cmd line");
+console.log('merge in cmd line');
 console.log(options);
 
 if (options.verboseLevel >= 2) {
@@ -121,7 +125,9 @@ if (!options.outDir) {
 
 options.rootDir = path.normalize(path.join(projectDir, options.rootDir));
 options.outDir = path.normalize(path.join(projectDir, options.outDir));
-options.includeDirs = options.includeDirs.map( includeDir => path.normalize(path.join(projectDir, includeDir)) );
+options.includeDirs = options.includeDirs.map((includeDir) =>
+  path.normalize(path.join(projectDir, includeDir))
+);
 if (options.verboseLevel >= 2) {
   console.log(options);
 }
@@ -132,7 +138,7 @@ let numErrors = 0;
 function inputFileNameToOutputFileName(inputFileName: string): string {
   inputFileName = path.normalize(inputFileName);
   var outputFileName =
-    inputFileName.replace(options.rootDir, options.outDir) + ".js";
+    inputFileName.replace(options.rootDir, options.outDir) + '.js';
   return outputFileName;
 }
 
@@ -177,7 +183,7 @@ function isFileSupported(fileName: string): boolean {
 }
 
 // options is optional
-let extGlob = options.extensions.join("|");
+let extGlob = options.extensions.join('|');
 let globRegex = `${options.rootDir}/**/*.+(${extGlob})`;
 
 glob(globRegex, {}, function (er, sourceFileNames) {
@@ -193,19 +199,19 @@ glob(globRegex, {}, function (er, sourceFileNames) {
 
   if (program.watch) {
     watch.createMonitor(options.rootDir, function (monitor) {
-      monitor.on("created", function (sourceFileName: string, stat) {
+      monitor.on('created', function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`created ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           transpile(sourceFileName);
         }
       });
-      monitor.on("changed", function (sourceFileName: string, curr, prev) {
+      monitor.on('changed', function (sourceFileName: string, curr, prev) {
         if (options.verboseLevel > 1) console.log(`changed ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           transpile(sourceFileName);
         }
       });
-      monitor.on("removed", function (sourceFileName: string, stat) {
+      monitor.on('removed', function (sourceFileName: string, stat) {
         if (options.verboseLevel > 1) console.log(`removed ${sourceFileName}`);
         if (isFileSupported(sourceFileName)) {
           let outputFileName = inputFileNameToOutputFileName(sourceFileName);
