@@ -11,7 +11,7 @@ const includeLocalRegex = /^[ \t]*#(?:pragma +)?include +["]([\w\d./]+)["]/gm; /
 const includeAbsoluteRegex =
   /^[ \t]*#(?:pragma +)?include +[<]([\w\d./]+)[>]/gm; // modified from three.js
 const jsModulePrefix = 'export default /* glsl */ `\n';
-const jsModulePostfix = '`;';
+const jsModulePostfix = '`;\n';
 
 export function glslToJavaScriptTranspiler(
   sourceFileName: string,
@@ -91,7 +91,8 @@ export function glslToJavaScriptTranspiler(
       if (relativeIncludePath.indexOf('.') !== 0) {
         relativeIncludePath = './' + relativeIncludePath;
       }
-      const includeImport = `import ${includeVar} from \'${relativeIncludePath}.js'`;
+      relativeIncludePath = relativeIncludePath.replace(/.js$/, '');
+      const includeImport = `import ${includeVar} from \'${relativeIncludePath}.js';`;
       if (includeImports.indexOf(includeImport) < 0) {
         // handle multiple imports of the same file
         includeImports.push(includeImport);
