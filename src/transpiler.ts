@@ -1,15 +1,16 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import makeDir from 'make-dir';
-import path from 'path';
+
 import {
   stripComments,
   stripUnnecessaryLineEndings,
   stripUnnecessarySpaces
 } from './minification.js';
 
-const includeLocalRegex = /^[ \t]*#(?:pragma +)?include +["]([\w\d./]+)["]/gm; // modified from three.js
-const includeAbsoluteRegex =
-  /^[ \t]*#(?:pragma +)?include +[<]([\w\d./]+)[>]/gm; // modified from three.js
+const includeLocalRegex = /^[\t ]*#(?:pragma +)?include +"([\w./]+)"/gm; // modified from three.js
+const includeAbsoluteRegex = /^[\t ]*#(?:pragma +)?include +<([\w./]+)>/gm; // modified from three.js
 const jsModulePrefix = 'export default /* glsl */ `\n';
 const jsModulePostfix = '`;\n';
 
@@ -23,7 +24,7 @@ export function glslToJavaScriptTranspiler(
 
   const includeGuardName = sourceFileName
     .replace(options.rootDir, '')
-    .replace(/[_./]/gm, '_');
+    .replace(/[./_]/gm, '_');
 
   const includeImports: string[] = [];
 
@@ -36,8 +37,7 @@ export function glslToJavaScriptTranspiler(
 
   if (options.allowJSIncludes) {
     searchExtensions.slice(0).forEach((extension: string) => {
-      searchExtensions.push(extension + '.ts');
-      searchExtensions.push(extension + '.js');
+      searchExtensions.push(extension + '.ts', extension + '.js');
     });
   }
 
@@ -75,7 +75,7 @@ export function glslToJavaScriptTranspiler(
 
       //console.log( `includeFilePath ${includeFilePath}` );
 
-      if (includeFilePath.length == 0) {
+      if (includeFilePath.length === 0) {
         const errorMsg = `Could not resolve "${match}" - current directory ${sourcePath}, attempts: ${pathsAttempted.join(
           ','
         )}`;
@@ -86,14 +86,14 @@ export function glslToJavaScriptTranspiler(
 
       const includeVar = includeFilePath
         .replace(options.rootDir, '')
-        .replace(/[_./]/gm, '_');
+        .replace(/[./_]/gm, '_');
       let relativeIncludePath = path.relative(sourcePath, includeFilePath);
       if (relativeIncludePath.indexOf('.') !== 0) {
         relativeIncludePath = './' + relativeIncludePath;
       }
       relativeIncludePath = relativeIncludePath.replace(/.js$/, '');
-      const includeImport = `import ${includeVar} from \'${relativeIncludePath}.js';`;
-      if (includeImports.indexOf(includeImport) < 0) {
+      const includeImport = `import ${includeVar} from '${relativeIncludePath}.js';`;
+      if (!includeImports.includes(includeImport)) {
         // handle multiple imports of the same file
         includeImports.push(includeImport);
       }
@@ -111,7 +111,7 @@ export function glslToJavaScriptTranspiler(
     outputSource = stripUnnecessarySpaces(outputSource);
   }
 
-  if (sourceCode.indexOf('#pragma once') >= 0) {
+  if (sourceCode.includes('#pragma once')) {
     const includeGuardPrefix = `#ifndef ${includeGuardName}\n#define ${includeGuardName}\n`;
     const includeGuardPostfix = `\n\n#endif // end of include guard`;
 

@@ -58,7 +58,7 @@ function parseInteger(token: any, defaultValue: number): number {
     return token;
   }
   if (typeof token === 'string') {
-    return parseInt(token);
+    return Number.parseInt(token);
   }
   throw new Error(`unhandled integer value: "${token}"`);
 }

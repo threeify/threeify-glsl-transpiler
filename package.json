@@ -27,9 +27,12 @@
   ],
   "scripts": {
     "build": "npx tsc",
-    "start": "npx tsc && node ./dist/index.js",
-    "lint": "eslint \"src/**/*.{ts,json}\"",
-    "prettier-format": "prettier --config .prettierrc \"src/**/*.{ts,json,html}\" --write"
+    "start": "npx tsc && node --enable-source-maps ./dist/index.js",
+    "lint": "npx eslint \"src/**/*.{ts,json}\"",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "npx prettier \"src/**/*.{ts,json}\" --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "format": "npm run prettier:fix && npm run lint:fix"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
@@ -37,7 +40,12 @@
     "@types/watch": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
+    "eslint-plugin-unicorn": "^44.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4"
   },

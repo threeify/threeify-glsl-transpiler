@@ -1,12 +1,14 @@
 #!/bin/sh
 /* eslint-disable no-console */
 ':'; //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
+import fs from 'node:fs';
+import path from 'node:path';
+import process, { exit } from 'node:process';
+
 import { program } from 'commander';
-import fs from 'fs';
 import glob from 'glob';
-import path from 'path';
-import process, { exit } from 'process';
 import watch from 'watch';
+
 import { Options } from './Options.js';
 import { glslToJavaScriptTranspiler } from './transpiler.js';
 
@@ -14,7 +16,7 @@ function commaSeparatedList(value: string): string[] {
   return value.split(',');
 }
 
-const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
 
 program
   .name('threeify-glsl-transpiler')
@@ -44,7 +46,7 @@ program
   .option(
     '-v, --verboseLevel <level>',
     `higher numbers means more output`,
-    parseInt
+    Number.parseInt
   );
 
 program.parse(process.argv);
@@ -72,7 +74,7 @@ if (programOptions.projectDir) {
 
 const tsConfigFilePath = path.join(projectDir, 'tsconfig.json');
 if (fs.existsSync(tsConfigFilePath)) {
-  const tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath, 'utf8'));
+  const tsConfig = JSON.parse(fs.readFileSync(tsConfigFilePath).toString());
   if (tsConfig.compilerOptions) {
     if (options.verboseLevel >= 1) {
       console.log(`  inferring setup from ${tsConfigFilePath}.`);
@@ -89,7 +91,9 @@ if (fs.existsSync(tsConfigFilePath)) {
 
 const threeifyFilePath = path.join(projectDir, 'threeify.json');
 if (fs.existsSync(threeifyFilePath)) {
-  const threeifyConfig = JSON.parse(fs.readFileSync(threeifyFilePath, 'utf8'));
+  const threeifyConfig = JSON.parse(
+    fs.readFileSync(threeifyFilePath).toString()
+  );
   if (options.verboseLevel >= 1) {
     console.log(`  reading settings from ${threeifyFilePath}.`);
   }
